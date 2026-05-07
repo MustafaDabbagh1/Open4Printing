@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Open4Printing"
+version = "1.0.0"
+id = "artifacts/open4printing"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20591
+
+[services.development]
+run = "pnpm --filter @workspace/open4printing run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/open4printing", "run", "build" ]
+publicDir = "artifacts/open4printing/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20591"
+BASE_PATH = "/"

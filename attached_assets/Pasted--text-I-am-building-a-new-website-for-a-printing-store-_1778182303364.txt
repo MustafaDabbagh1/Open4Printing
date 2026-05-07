@@ -1,0 +1,250 @@
+```text
+I am building a new website for a printing store called Open4Printing. The domain is open4printing.com.
+
+I want the website to feel like a professional online print shop where customers can browse products, upload artwork/files, choose print options, and request or place orders.
+
+Reference websites:
+Use these websites as references so you understand the type of layout and shopping experience I want:
+
+1. Vistaprint category/navigation reference:
+https://www.vistaprint.com/print-advertising-office-materials
+
+Use this mainly for:
+- Header structure
+- Main category tabs
+- Search bar placement
+- Ecommerce print-shop flow
+- Product category organization
+
+2. Signs365 catalog/card layout reference:
+https://www.signs365.com/#catalog/1
+
+Use this mainly for:
+- Product catalog grid style
+- Large rounded product cards
+- Category sections like “Rigid Products”
+- Product cards with background images and short descriptions
+- Clean wholesale print catalog feel
+
+Important:
+These are references only. Do not copy their branding, logos, exact wording, exact images, CSS, or layout pixel-for-pixel. Create an original Open4Printing website inspired by the structure and shopping flow.
+
+Core inspiration:
+The main product catalog experience should be inspired by Signs365’s catalog layout:
+- Large product category sections
+- Clean product grids
+- Big rounded product cards
+- Product image backgrounds
+- Short product descriptions
+- Simple, easy-to-shop layout
+- Modern print-shop/ecommerce feel
+
+Top navigation:
+Create a header inspired by the Vistaprint homepage/category structure. I want these same main tabs/categories in the navigation:
+
+1. Deals
+2. Business Cards
+3. Postcards & Print Advertising
+4. Signs, Banners & Posters
+5. Stickers & Labels
+6. Clothing & Bags
+7. Promotional Products
+8. Packaging
+9. Invitations, Gifts & Stationery
+10. Wedding
+11. Logo, Websites & Social
+12. Design Services
+
+Header requirements:
+- Open4Printing logo area on the left
+- Large search bar
+- Help/contact area
+- My Projects
+- Favorites
+- Sign In
+- Cart
+- Responsive mobile menu
+- Dropdown mega menus for the main categories
+
+Website pages/sections:
+Build the homepage and product catalog system.
+
+Homepage should include:
+- Hero section with strong headline like “Custom Printing Made Simple”
+- Search bar or “What are you printing today?” product finder
+- Popular product cards
+- Category navigation
+- Featured deals
+- Upload artwork CTA
+- Why choose Open4Printing section
+- Fast turnaround / quality printing / local support messaging
+- Footer with contact info, policies, and product links
+
+Product catalog:
+Create catalog pages for each main tab/category. Each category should show product cards. Each product card should have:
+- Product image placeholder or generated visual background
+- Product name
+- Short description
+- Starting price placeholder
+- “Shop now” or “Upload design” button
+
+Products to include:
+
+Business Cards:
+- Standard Business Cards
+- Premium Business Cards
+- Matte Business Cards
+- Glossy Business Cards
+- Square Business Cards
+- Folded Business Cards
+
+Postcards & Print Advertising:
+- Postcards
+- Flyers
+- Brochures
+- Door Hangers
+- Rack Cards
+- Menus
+- Presentation Folders
+
+Signs, Banners & Posters:
+- Coroplast Yard Signs
+- Acrylic Signs
+- Foam Core Signs
+- Aluminum Signs
+- PVC Signs
+- Banners
+- Retractable Banners
+- Posters
+- Window Graphics
+- Real Estate Signs
+
+Stickers & Labels:
+- Custom Stickers
+- Product Labels
+- Roll Labels
+- Circle Stickers
+- Square Stickers
+- Waterproof Labels
+
+Clothing & Bags:
+- T-Shirts
+- Hoodies
+- Tote Bags
+- Caps
+- Aprons
+
+Promotional Products:
+- Pens
+- Mugs
+- Keychains
+- Notebooks
+- Tumblers
+- Magnets
+
+Packaging:
+- Custom Boxes
+- Mailer Boxes
+- Product Packaging
+- Thank You Cards
+- Packaging Labels
+
+Invitations, Gifts & Stationery:
+- Invitations
+- Greeting Cards
+- Thank You Cards
+- Notepads
+- Letterhead
+- Envelopes
+
+Wedding:
+- Wedding Invitations
+- Save the Dates
+- Wedding Menus
+- Seating Charts
+- Welcome Signs
+- Thank You Cards
+
+Logo, Websites & Social:
+- Logo Design
+- Social Media Graphics
+- Website Design
+- Brand Kits
+- Digital Business Cards
+
+Design Services:
+- Print Design Help
+- Logo Design Help
+- File Setup
+- Artwork Fixing
+- Custom Design Request
+
+Product detail page:
+Each product should have its own product page with:
+- Product title
+- Product images/placeholders
+- Description
+- Size options
+- Quantity options
+- Paper/material options when relevant
+- Finish options when relevant
+- Turnaround options
+- Upload artwork/file upload section
+- Notes/instructions box
+- Price placeholder or quote request
+- Add to Cart button
+- Request Design Help button
+
+File upload:
+Add an upload artwork feature for each product page:
+- Allow PDF, PNG, JPG, AI, PSD, SVG, EPS
+- Show uploaded file name
+- Add a message like “We’ll review your file before printing”
+- Include a design notes text box
+- This can be front-end only for now unless backend is already set up
+
+Cart/checkout:
+Create a simple front-end cart:
+- Product name
+- Selected options
+- Uploaded file name if available
+- Quantity
+- Estimated price placeholder
+- Remove item
+- Checkout/request quote button
+
+Design style:
+- Modern, clean, premium printing company style
+- Use white space, soft shadows, rounded cards
+- Color palette should feel fresh and professional
+- Use Open4Printing branding, not Vistaprint or Signs365 branding
+- Avoid making it look like a cheap template
+- Use smooth hover effects and subtle animations
+- Make it fully responsive on desktop, tablet, and mobile
+
+Functionality:
+- Search bar should filter products by name/category
+- Category tabs should route to category pages
+- Product cards should open product detail pages
+- Upload buttons should work visually
+- Cart should save items in local state/localStorage for now
+- Make the structure easy to connect to a real backend later
+
+Tech:
+Use the existing project stack. If this is an Astro project, use Astro components and shared layout. If it is React, use React components. Keep the code clean and organized.
+
+Suggested structure:
+- components/Header
+- components/MegaMenu
+- components/ProductCard
+- components/ProductGrid
+- components/FileUpload
+- components/Footer
+- data/products.js or products.ts
+- pages/index
+- pages/category/[slug]
+- pages/product/[slug]
+- pages/cart
+
+Please build the first working version with polished UI and placeholder images where needed. Make sure it runs without errors.
+```

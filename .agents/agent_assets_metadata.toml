@@ -1,0 +1,62 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "sFRgNlmQQdV0Oi9Sw0qiO"
+uri = "file://artifacts/open4printing/public/images/hero.png"
+type = "image"
+title = "Print shop hero banner"
+
+[[generated]]
+id = "ku3wmThTLFyQU2nJn9oCr"
+uri = "file://artifacts/open4printing/public/images/cat-business-cards.png"
+type = "image"
+title = "Business cards stack"
+
+[[generated]]
+id = "OaKg2h3gC-va___mwvXwG"
+uri = "file://artifacts/open4printing/public/images/cat-postcards.png"
+type = "image"
+title = "Postcards and flyers"
+
+[[generated]]
+id = "KjDEDwOPBcgbFWzxgIANu"
+uri = "file://artifacts/open4printing/public/images/cat-signs.png"
+type = "image"
+title = "Large outdoor sign"
+
+[[generated]]
+id = "cW2E00f52ceoDnFF2TsRF"
+uri = "file://artifacts/open4printing/public/images/cat-stickers.png"
+type = "image"
+title = "Custom stickers on laptop"
+
+[[generated]]
+id = "d8D0r9lef7xdkHlNG5viT"
+uri = "file://artifacts/open4printing/public/images/cat-clothing.png"
+type = "image"
+title = "Custom printed t-shirt"
+
+[[generated]]
+id = "W2aQEq7m5A5s5IZ04vad7"
+uri = "file://artifacts/open4printing/public/images/cat-promo.png"
+type = "image"
+title = "Promotional coffee mug"
+
+[[generated]]
+id = "bE0DYaumM4HqdT18R9Dvs"
+uri = "file://artifacts/open4printing/public/images/cat-packaging.png"
+type = "image"
+title = "Custom cardboard packaging"
+
+[[generated]]
+id = "cK9GGL8Vlud9d-htQVM0Z"
+uri = "file://artifacts/open4printing/public/images/cat-wedding.png"
+type = "image"
+title = "Elegant wedding invitations"
+
+[[generated]]
+id = "ez-_8wTFxNpQ4A81Iqerz"
+uri = "file://artifacts/open4printing/public/images/cat-design.png"
+type = "image"
+title = "Design services workspace"
