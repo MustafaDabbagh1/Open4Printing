@@ -16,11 +16,39 @@ export async function seedAdminUser(): Promise<void> {
     .where(eq(adminUsersTable.email, email));
   if (existing) {
     logger.info({ email }, "Admin user already exists");
-    return;
+  } else {
+    const passwordHash = await hashPassword(password);
+    await db.insert(adminUsersTable).values({ email, passwordHash, name: "Admin" });
+    logger.info({ email }, "Seeded default admin user");
   }
-  const passwordHash = await hashPassword(password);
-  await db.insert(adminUsersTable).values({ email, passwordHash, name: "Admin" });
-  logger.info({ email }, "Seeded default admin user");
+
+  // Ibrahim admin — login by username "Ibrahim". Password is bcrypt-hashed.
+  const ibrahimUsername = "Ibrahim";
+  const ibrahimEmail = "ibrahim@open4printing.com";
+  const ibrahimPassword = "123456";
+  const [ibrahim] = await db
+    .select()
+    .from(adminUsersTable)
+    .where(eq(adminUsersTable.email, ibrahimEmail));
+  if (!ibrahim) {
+    const passwordHash = await hashPassword(ibrahimPassword);
+    await db.insert(adminUsersTable).values({
+      email: ibrahimEmail,
+      username: ibrahimUsername,
+      passwordHash,
+      name: "Ibrahim",
+    });
+    logger.info({ username: ibrahimUsername }, "Seeded Ibrahim admin user");
+  } else if (!ibrahim.username) {
+    // Backfill username on an existing row created before the column was added.
+    await db
+      .update(adminUsersTable)
+      .set({ username: ibrahimUsername })
+      .where(eq(adminUsersTable.id, ibrahim.id));
+    logger.info({ username: ibrahimUsername }, "Backfilled Ibrahim username");
+  } else {
+    logger.info({ username: ibrahimUsername }, "Ibrahim admin already exists");
+  }
 }
 
 interface SeedProduct {

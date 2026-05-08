@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db, adminUsersTable } from "@workspace/db";
 import { AdminLoginBody, AdminLoginResponse, AdminMeResponse } from "@workspace/api-zod";
 import {
@@ -20,19 +20,27 @@ router.post("/admin/login", async (req, res): Promise<void> => {
     return;
   }
 
+  // The "email" field is treated as a login identifier — accept either an
+  // email address (matched lowercased) or a username (case-sensitive).
+  const identifier = parsed.data.email.trim();
   const [user] = await db
     .select()
     .from(adminUsersTable)
-    .where(eq(adminUsersTable.email, parsed.data.email.toLowerCase()));
+    .where(
+      or(
+        eq(adminUsersTable.email, identifier.toLowerCase()),
+        eq(adminUsersTable.username, identifier),
+      ),
+    );
 
   if (!user) {
-    res.status(401).json({ error: "Invalid email or password" });
+    res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 
   const ok = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!ok) {
-    res.status(401).json({ error: "Invalid email or password" });
+    res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 

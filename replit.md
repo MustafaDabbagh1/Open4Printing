@@ -59,6 +59,17 @@ A custom-print ecommerce store: customers browse products, configure options, up
   - Order detail with payment/order status updates and per-item file downloads
   - Products management (price, name, description, enabled flag)
 
+## Admin access
+
+- **Login URL:** `/admin/login`
+- **Dashboard URL (after login):** `/admin/dashboard` (also reachable at `/admin`)
+- **Seeded admin accounts** (passwords are bcrypt-hashed in `admin_users.password_hash`):
+  - Username `Ibrahim` / Password `123456` (login by username)
+  - Email `admin@open4printing.com` / Password `admin123` (configurable via `ADMIN_EMAIL` / `ADMIN_PASSWORD`)
+- The login form accepts either an email or a username in the same field.
+- All `/admin/*` routes (dashboard, orders, products) are gated by `useAdminMe()` on the client and the JWT cookie checked by `requireAdmin` on the server. Unauthenticated visitors are redirected to `/admin/login`.
+- The dashboard surfaces KPI tiles (orders, revenue, customers, etc.) and recent orders with order status, payment status, customer info, and links into per-order detail (which includes uploaded files).
+
 ## User preferences
 
 _Populate as you build — explicit user instructions worth remembering across sessions._

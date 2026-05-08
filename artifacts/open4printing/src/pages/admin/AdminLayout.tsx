@@ -23,7 +23,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   };
 
   const NavLink = ({ href, icon: Icon, children }: { href: string; icon: typeof LayoutDashboard; children: ReactNode }) => {
-    const active = location === href || (href !== "/admin" && location.startsWith(href));
+    const active = location === href
+      || (href === "/admin/dashboard" && (location === "/admin" || location === "/admin/dashboard"))
+      || (href !== "/admin" && href !== "/admin/dashboard" && location.startsWith(href));
     return (
       <Link href={href} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${active ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}>
         <Icon className="w-4 h-4" /> {children}
@@ -42,7 +44,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <div className="font-bold truncate">{me.data.email}</div>
               </div>
               <nav className="space-y-1">
-                <NavLink href="/admin" icon={LayoutDashboard}>Dashboard</NavLink>
+                <NavLink href="/admin/dashboard" icon={LayoutDashboard}>Dashboard</NavLink>
                 <NavLink href="/admin/orders" icon={ShoppingBag}>Orders</NavLink>
                 <NavLink href="/admin/products" icon={Package}>Products</NavLink>
               </nav>

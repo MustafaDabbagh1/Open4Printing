@@ -16,7 +16,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
 
   if (me.data) {
-    setLocation("/admin");
+    setLocation("/admin/dashboard");
     return null;
   }
 
@@ -25,7 +25,7 @@ export default function AdminLogin() {
     try {
       await login.mutateAsync({ data: { email, password } });
       await me.refetch();
-      setLocation("/admin");
+      setLocation("/admin/dashboard");
     } catch (err) {
       toast({
         title: "Login failed",
@@ -47,8 +47,8 @@ export default function AdminLogin() {
         </div>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Label htmlFor="email">Email or username</Label>
+            <Input id="email" type="text" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="password">Password</Label>
