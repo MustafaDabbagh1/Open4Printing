@@ -1,0 +1,84 @@
+Fix the checkout page. I do NOT want a “we’ll send you a secure payment link later” checkout.
+
+I want a normal ecommerce checkout where the customer pays directly on the website.
+
+Remove this message:
+“We'll send you a secure payment link by email after we review your files. Your order will be marked as Pending Payment until then.”
+
+Replace the checkout payment section with a real checkout-style payment form layout.
+
+Checkout page should have these sections in this order:
+
+1. Contact Information
+- First name
+- Last name
+- Email
+- Phone number
+
+2. Shipping Address
+- Street address
+- Apartment/suite optional
+- City
+- State
+- ZIP code
+- Delivery method:
+  - Pickup
+  - Shipping
+
+3. Billing Address
+- Checkbox: “Billing address is the same as shipping”
+- If unchecked, show billing address fields
+
+4. Order Summary
+- Product name
+- Selected options
+- Quantity
+- Uploaded file name
+- Subtotal
+- Shipping
+- Tax
+- Total
+
+5. Payment
+Create a normal payment section that looks like a real ecommerce checkout:
+- Card number
+- Expiration date
+- CVV
+- Name on card
+- Billing ZIP code
+- Button: “Place Order”
+
+Important payment behavior:
+- For now, this can be a test/demo payment form.
+- Do not actually process payment yet unless Authorize.net credentials are added.
+- Keep the backend structured so Authorize.net can be connected later.
+- The customer-facing checkout should still look and behave like they are paying directly on the website.
+- When they click “Place Order,” create the order and mark payment status as either “test_paid” or “pending_authorize_net_connection” depending on how the backend is currently set up.
+- Do not tell the customer they will receive a payment link later.
+
+Authorize.net preparation:
+- Keep the backend Authorize.net placeholder route/service.
+- Keep the environment variables for Authorize.net.
+- Payment keys must stay backend-only.
+- Add TODO comments for the real Authorize.net transaction API.
+- The frontend payment form should submit to the backend payment/order route.
+
+Design:
+- Make it look like a clean, normal ecommerce checkout similar to Shopify, Vistaprint, or any modern online store.
+- The payment box should look professional and trustworthy.
+- Add small text under the payment form saying:
+  “Payments will be securely processed. Your card details are not stored by Open4Printing.”
+- Make the checkout page compact and not overly spaced out.
+- Use a two-column desktop layout:
+  - Left side: customer/shipping/billing/payment forms
+  - Right side: sticky order summary
+- On mobile, stack everything in one column.
+
+Also fix the font styling:
+- The checkout headings look too oversized and decorative right now.
+- Use a clean modern ecommerce font style.
+- Make “Checkout” smaller and more professional.
+- Make the form feel like a real checkout, not a landing page section.
+
+Final result:
+The customer should be able to add products to cart, go to checkout, enter shipping/contact/payment info, click Place Order, and see an order confirmation page.

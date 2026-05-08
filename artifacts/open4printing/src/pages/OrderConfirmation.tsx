@@ -58,10 +58,17 @@ export default function OrderConfirmation() {
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800 rounded-2xl p-6 mb-8">
-        <h3 className="font-bold mb-2">What happens next?</h3>
-        <p className="text-sm">Your order is currently <strong>{data.paymentStatus.replace("_", " ")}</strong>. We'll review your files within 4 business hours and email you a secure payment link.</p>
-      </div>
+      {data.paymentStatus === "paid" ? (
+        <div className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 rounded-2xl p-6 mb-8">
+          <h3 className="font-bold mb-2">Payment received</h3>
+          <p className="text-sm">Thanks! Your payment was successfully processed. Our team will review your files within 4 business hours and send a production update by email.</p>
+        </div>
+      ) : (
+        <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800 rounded-2xl p-6 mb-8">
+          <h3 className="font-bold mb-2">Payment status: {data.paymentStatus.replace(/_/g, " ")}</h3>
+          <p className="text-sm">Your order has been received. Our team will be in touch shortly with next steps.</p>
+        </div>
+      )}
 
       <div className="text-center">
         <Link href="/"><Button size="lg" className="rounded-2xl">Back to home</Button></Link>

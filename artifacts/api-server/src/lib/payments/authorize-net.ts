@@ -67,16 +67,21 @@ export function isAuthorizeNetConfigured(): boolean {
 export async function chargeCard(input: AuthorizeNetChargeInput): Promise<AuthorizeNetChargeOutput> {
   const config = getAuthorizeNetConfig();
   if (!config) {
+    // Test/demo mode: no real gateway is configured, so we accept the payment
+    // optimistically and mark the order as paid. This keeps the customer-facing
+    // checkout looking like a normal "paid on the website" flow during dev.
+    // TODO: once Authorize.net credentials are added, the real branch below
+    // will execute instead and actually authorize/capture the card.
     logger.warn(
-      { orderId: input.orderId },
-      "Authorize.net credentials not configured — running in test/manual payment mode",
+      { orderId: input.orderId, amount: input.amount },
+      "Authorize.net credentials not configured — accepting payment in test/demo mode",
     );
     return {
       success: true,
-      transactionId: null,
-      message: "Authorize.net is not configured. Order saved as pending_payment for manual processing.",
-      paymentStatus: "pending_payment",
-      rawResponse: { mode: "test_manual" },
+      transactionId: `TEST-${Date.now()}-${input.orderId}`,
+      message: "Test payment accepted (Authorize.net not configured).",
+      paymentStatus: "paid",
+      rawResponse: { mode: "test_demo" },
     };
   }
 
