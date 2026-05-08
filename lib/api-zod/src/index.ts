@@ -1,2 +1,21 @@
 export * from "./generated/api";
-export * from "./generated/types";
+export type {
+  HealthStatus,
+  ErrorResponse,
+  Address,
+  OrderItemOptions,
+  CreateOrderItem,
+  OrderConfirmation,
+  OrderItemDetail,
+  UploadedFileInfo,
+  PaymentInfo,
+  OrderDetail,
+  OrderSummary,
+  UpdateOrderBody,
+  AdminMe,
+  AdminDashboardStats,
+  AdminProduct,
+  UpdateProductBody,
+  AuthorizeNetChargeBody,
+  AuthorizeNetChargeResult,
+} from "./generated/types";

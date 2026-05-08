@@ -30,6 +30,8 @@ export default function Product() {
   const [quantity, setQuantity] = useState("100");
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [uploadedFileId, setUploadedFileId] = useState<number | undefined>(undefined);
+  const [uploading, setUploading] = useState(false);
 
   // Simple pricing formula
   const estimatedPrice = useMemo(() => {
@@ -62,13 +64,29 @@ export default function Product() {
     return <div className="container py-24 text-center text-2xl font-serif">Product not found.</div>;
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = e.target.files?.[0];
+    if (!picked) return;
+    setFile(picked);
+    setUploadedFileId(undefined);
+    setUploading(true);
+    try {
+      const { uploadFile } = await import("@/lib/api");
+      const result = await uploadFile(picked);
+      setUploadedFileId(result.id);
       toast({
-        title: "File attached",
-        description: `${e.target.files[0].name} is ready for review.`,
+        title: "File uploaded",
+        description: `${picked.name} is ready for your order.`,
       });
+    } catch (err) {
+      toast({
+        title: "Upload failed",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+      setFile(null);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -79,6 +97,7 @@ export default function Product() {
       unitPrice: estimatedPrice,
       quantity: 1, // The "quantity" in options refers to print quantity per item, cart qty is 1 set
       fileName: file?.name,
+      uploadedFileId,
       options: {
         "Print Quantity": quantity,
         "Size": size,

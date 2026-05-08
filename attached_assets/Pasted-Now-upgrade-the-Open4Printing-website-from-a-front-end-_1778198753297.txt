@@ -1,0 +1,226 @@
+Now upgrade the Open4Printing website from a front-end demo into a real ecommerce-ready system.
+
+Goal:
+Build a full ecommerce checkout flow with a backend admin login where we can see all customer purchases/orders. Also structure the payment system so it is ready to connect to Authorize.net APIs for real payment processing.
+
+Important:
+Do not hardcode real Authorize.net credentials. Use environment variables only. Add placeholder environment variables and clear comments where the real API keys will go later.
+
+Core ecommerce features needed:
+
+1. Customer shopping flow
+- Customers can browse products
+- Customers can select product options
+- Customers can upload print files/artwork
+- Customers can add items to cart
+- Customers can edit quantity/options in cart
+- Customers can proceed to checkout
+- Customers can enter contact info
+- Customers can enter shipping/billing info
+- Customers can submit the order
+- Customers receive an order confirmation page with order number
+
+2. Product option system
+Each product should support flexible options, including:
+- Size
+- Quantity
+- Paper/material
+- Finish
+- Turnaround time
+- Single-sided or double-sided where relevant
+- Upload artwork
+- Special instructions
+
+Make the product option system reusable so we can easily add more products later.
+
+3. Checkout page
+Build a professional checkout page with:
+- Customer information
+- Email
+- Phone number
+- Billing address
+- Shipping address
+- Order summary
+- Uploaded files summary
+- Notes/instructions
+- Payment section placeholder
+- Submit order button
+
+4. Authorize.net payment preparation
+Prepare the backend payment structure for Authorize.net.
+
+Add:
+- Payment service file/module
+- Placeholder Authorize.net API integration function
+- Environment variables for:
+  - AUTHORIZE_NET_API_LOGIN_ID
+  - AUTHORIZE_NET_TRANSACTION_KEY
+  - AUTHORIZE_NET_ENVIRONMENT
+- Support for sandbox/production mode
+- Backend route like /api/payments/authorize-net/charge
+- Clear TODO comments explaining where to add the real Authorize.net API call
+
+For now, if real payment credentials are not added, checkout should still work in “test/manual payment mode” and create the order as pending payment.
+
+Payment statuses:
+- pending_payment
+- paid
+- failed
+- refunded
+- cancelled
+
+5. Backend database
+Add a database system for:
+- Products
+- Customers
+- Orders
+- Order items
+- Uploaded files metadata
+- Payments
+- Admin users
+
+Use whatever backend/database is best for the current Replit project. If this project already has a backend, use it. If not, add a simple Node/Express backend with a database like SQLite, PostgreSQL, Prisma, or whatever is most appropriate and reliable in Replit.
+
+Order records should include:
+- Order ID/order number
+- Customer name
+- Customer email
+- Customer phone
+- Billing address
+- Shipping address
+- Products ordered
+- Product options selected
+- Uploaded file names/URLs
+- Special instructions
+- Order subtotal
+- Taxes placeholder
+- Shipping placeholder
+- Total
+- Payment status
+- Order status
+- Created date
+
+Order statuses:
+- new
+- awaiting_artwork_review
+- in_production
+- ready_for_pickup
+- shipped
+- completed
+- cancelled
+
+6. Admin login
+Create a secure admin login page.
+
+Admin features:
+- Admin can log in
+- Admin can see dashboard stats
+- Admin can see all orders
+- Admin can click into each order
+- Admin can view customer details
+- Admin can view ordered products and selected options
+- Admin can view uploaded file information
+- Admin can update order status
+- Admin can update payment status manually
+- Admin can search/filter orders
+- Admin can see newest orders first
+
+Admin pages needed:
+- /admin/login
+- /admin/dashboard
+- /admin/orders
+- /admin/orders/[id]
+- /admin/products
+
+7. Admin dashboard
+Dashboard should show:
+- Total orders
+- New orders
+- Pending payment orders
+- Paid orders
+- Orders in production
+- Completed orders
+- Recent orders table
+
+8. Product management
+Create an admin product management area where we can eventually:
+- Add products
+- Edit product names/descriptions
+- Edit product pricing placeholders
+- Edit available options
+- Enable/disable products
+
+It is okay if product management is simple for now, but build the structure cleanly so it can grow.
+
+9. File uploads
+Artwork uploads should be connected to orders.
+
+Allow customers to upload:
+- PDF
+- PNG
+- JPG
+- JPEG
+- SVG
+- EPS
+- AI
+- PSD
+
+Store uploaded file metadata with the order:
+- Original file name
+- File type
+- File size
+- Upload date
+- Related order ID
+
+If file storage is local for now, make it easy to replace later with cloud storage like S3, Cloudflare R2, or similar.
+
+10. Security basics
+Add basic security:
+- Password hashing for admin users
+- Protected admin routes
+- Session or JWT authentication
+- Backend validation for checkout data
+- Do not expose payment keys on the frontend
+- Store sensitive API keys only in environment variables
+- Add .env.example with placeholder values
+
+11. Emails/notifications
+Add a basic structure for future email notifications:
+- Order confirmation email to customer
+- New order notification to admin
+- Payment confirmation
+- Status update email
+
+For now, create the functions/placeholders, even if real email sending is not connected yet.
+
+12. Design
+Keep the design polished and professional:
+- Modern print-shop ecommerce look
+- Clean checkout UI
+- Simple admin dashboard
+- Mobile responsive
+- Clear order cards/tables
+- Easy navigation
+
+13. Testing/demo data
+Add demo products and demo orders so I can test the admin dashboard.
+
+Create one default admin user for local testing only, using environment variables or seed data:
+- ADMIN_EMAIL
+- ADMIN_PASSWORD
+
+Do not expose the password on the frontend.
+
+14. Final result
+Make sure the site can:
+- Browse products
+- Add products to cart
+- Upload artwork
+- Submit checkout
+- Save the order to the backend/database
+- Show confirmation page
+- Let admin log in
+- Let admin view and manage orders
+- Be ready for Authorize.net API credentials later
+
+Please implement this in a clean, organized way and make sure the project runs without errors.

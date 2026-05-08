@@ -3,20 +3,22 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Open4Printing API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: orders
+  - name: admin
+  - name: payments
+  - name: products
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +26,519 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Submit a new order from checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderConfirmation"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/{orderNumber}:
+    get:
+      operationId: getOrderByNumber
+      tags: [orders]
+      summary: Look up an order by its public order number (for confirmation page)
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMe"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "204":
+          description: Logged out
+
+  /admin/me:
+    get:
+      operationId: adminMe
+      tags: [admin]
+      summary: Current admin session
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMe"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/dashboard/stats:
+    get:
+      operationId: getAdminDashboardStats
+      tags: [admin]
+      summary: Aggregated stats for the admin dashboard
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboardStats"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      summary: List all orders (newest first)
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+        - name: orderStatus
+          in: query
+          required: false
+          schema: { type: string }
+        - name: paymentStatus
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrderSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/orders/{id}:
+    get:
+      operationId: getAdminOrder
+      tags: [admin]
+      summary: Get a single order with items, files, and payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAdminOrder
+      tags: [admin]
+      summary: Update order or payment status (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/products:
+    get:
+      operationId: listAdminProducts
+      tags: [admin]
+      summary: List all products (admin)
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminProduct"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/products/{id}:
+    patch:
+      operationId: updateAdminProduct
+      tags: [admin]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductBody"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminProduct"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /payments/authorize-net/charge:
+    post:
+      operationId: chargeAuthorizeNet
+      tags: [payments]
+      summary: Charge a card via Authorize.net (placeholder integration)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthorizeNetChargeBody"
+      responses:
+        "200":
+          description: Charge result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorizeNetChargeResult"
+        "400":
+          description: Validation or charge error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+
+    Address:
+      type: object
+      properties:
+        line1: { type: string }
+        line2: { type: ["string", "null"] }
+        city: { type: string }
+        state: { type: string }
+        postalCode: { type: string }
+        country: { type: string }
+      required: [line1, city, state, postalCode, country]
+
+    OrderItemOptions:
+      type: object
+      additionalProperties:
+        oneOf:
+          - { type: string }
+          - { type: number }
+
+    CreateOrderItem:
+      type: object
+      properties:
+        productSlug: { type: string }
+        productName: { type: string }
+        options:
+          $ref: "#/components/schemas/OrderItemOptions"
+        quantity: { type: integer, minimum: 1 }
+        unitPrice: { type: number }
+        lineTotal: { type: number }
+        uploadedFileIds:
+          type: array
+          items: { type: integer }
+      required: [productSlug, productName, quantity, unitPrice, lineTotal]
+
+    CreateOrderBody:
+      type: object
+      properties:
+        email: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        phone: { type: ["string", "null"] }
+        billingAddress: { $ref: "#/components/schemas/Address" }
+        shippingAddress: { $ref: "#/components/schemas/Address" }
+        notes: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CreateOrderItem" }
+        subtotal: { type: number }
+        tax: { type: number }
+        shipping: { type: number }
+        total: { type: number }
+      required: [email, firstName, lastName, billingAddress, shippingAddress, items, subtotal, total]
+
+    OrderConfirmation:
+      type: object
+      properties:
+        orderNumber: { type: string }
+        id: { type: integer }
+        total: { type: number }
+        paymentStatus: { type: string }
+        orderStatus: { type: string }
+      required: [orderNumber, id, total, paymentStatus, orderStatus]
+
+    OrderItemDetail:
+      type: object
+      properties:
+        id: { type: integer }
+        productSlug: { type: string }
+        productName: { type: string }
+        options: { $ref: "#/components/schemas/OrderItemOptions" }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+        lineTotal: { type: number }
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/UploadedFileInfo" }
+      required: [id, productSlug, productName, options, quantity, unitPrice, lineTotal, files]
+
+    UploadedFileInfo:
+      type: object
+      properties:
+        id: { type: integer }
+        originalName: { type: string }
+        fileType: { type: string }
+        fileSize: { type: integer }
+        uploadedAt: { type: string, format: date-time }
+      required: [id, originalName, fileType, fileSize, uploadedAt]
+
+    PaymentInfo:
+      type: object
+      properties:
+        id: { type: integer }
+        provider: { type: string }
+        providerTransactionId: { type: ["string", "null"] }
+        amount: { type: number }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, provider, amount, status, createdAt]
+
+    OrderDetail:
+      type: object
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        firstName: { type: string }
+        lastName: { type: string }
+        billingAddress: { $ref: "#/components/schemas/Address" }
+        shippingAddress: { $ref: "#/components/schemas/Address" }
+        notes: { type: string }
+        subtotal: { type: number }
+        tax: { type: number }
+        shipping: { type: number }
+        total: { type: number }
+        paymentStatus: { type: string }
+        orderStatus: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItemDetail" }
+        payments:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentInfo" }
+      required: [id, orderNumber, email, firstName, lastName, billingAddress, shippingAddress, notes, subtotal, tax, shipping, total, paymentStatus, orderStatus, createdAt, updatedAt, items, payments]
+
+    OrderSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        email: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        total: { type: number }
+        paymentStatus: { type: string }
+        orderStatus: { type: string }
+        itemCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, orderNumber, email, firstName, lastName, total, paymentStatus, orderStatus, itemCount, createdAt]
+
+    UpdateOrderBody:
+      type: object
+      properties:
+        orderStatus: { type: ["string", "null"] }
+        paymentStatus: { type: ["string", "null"] }
+
+    AdminLoginBody:
+      type: object
+      properties:
+        email: { type: string }
+        password: { type: string }
+      required: [email, password]
+
+    AdminMe:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        name: { type: string }
+      required: [id, email, name]
+
+    AdminDashboardStats:
+      type: object
+      properties:
+        totalOrders: { type: integer }
+        newOrders: { type: integer }
+        pendingPaymentOrders: { type: integer }
+        paidOrders: { type: integer }
+        inProductionOrders: { type: integer }
+        completedOrders: { type: integer }
+        totalRevenue: { type: number }
+        recentOrders:
+          type: array
+          items: { $ref: "#/components/schemas/OrderSummary" }
+      required: [totalOrders, newOrders, pendingPaymentOrders, paidOrders, inProductionOrders, completedOrders, totalRevenue, recentOrders]
+
+    AdminProduct:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        categorySlug: { type: string }
+        shortDescription: { type: string }
+        startingPrice: { type: number }
+        enabled: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, slug, name, categorySlug, shortDescription, startingPrice, enabled, createdAt, updatedAt]
+
+    UpdateProductBody:
+      type: object
+      properties:
+        name: { type: ["string", "null"] }
+        shortDescription: { type: ["string", "null"] }
+        startingPrice: { type: ["number", "null"] }
+        enabled: { type: ["boolean", "null"] }
+
+    AuthorizeNetChargeBody:
+      type: object
+      properties:
+        orderId: { type: integer }
+        amount: { type: number }
+        cardNumber: { type: string }
+        expirationDate: { type: string, description: "MMYY" }
+        cardCode: { type: string }
+      required: [orderId, amount, cardNumber, expirationDate, cardCode]
+
+    AuthorizeNetChargeResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        transactionId: { type: ["string", "null"] }
+        message: { type: string }
+        paymentStatus: { type: string }
+      required: [success, message, paymentStatus]

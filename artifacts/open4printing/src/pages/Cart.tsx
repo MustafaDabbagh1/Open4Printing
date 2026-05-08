@@ -17,14 +17,7 @@ export default function Cart() {
   const total = subtotal + shipping;
 
   const handleCheckout = () => {
-    toast({
-      title: "Order requested!",
-      description: "We've received your request. A representative will contact you shortly.",
-    });
-    setTimeout(() => {
-      clearCart();
-      setLocation("/");
-    }, 2000);
+    setLocation("/checkout");
   };
 
   if (items.length === 0) {

@@ -7,6 +7,7 @@ export interface CartItem {
   options: Record<string, string>;
   quantity: number;
   fileName?: string;
+  uploadedFileId?: number;
   unitPrice: number;
 }
 

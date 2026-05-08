@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -25,8 +26,16 @@ app.use(
     },
   }),
 );
-app.use(cors());
-app.use(express.json());
+const corsOriginEnv = process.env["CORS_ORIGIN"];
+const corsOrigins = corsOriginEnv
+  ? corsOriginEnv.split(",").map((s) => s.trim()).filter(Boolean)
+  : [];
+if (corsOrigins.length > 0) {
+  app.use(cors({ credentials: true, origin: corsOrigins }));
+}
+// Default: same-origin only (frontend and API are served behind the same proxy).
+app.use(cookieParser());
+app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
