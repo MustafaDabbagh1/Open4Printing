@@ -9,7 +9,7 @@ import { apiPath } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const ORDER_STATUSES = ["new","awaiting_artwork_review","in_production","ready_for_pickup","shipped","completed","cancelled"];
-const PAYMENT_STATUSES = ["pending_payment","paid","failed","refunded","cancelled"];
+const PAYMENT_STATUSES = ["pending_payment","pending_authorize_net_connection","test_paid","paid","failed","refunded","cancelled"];
 
 export default function AdminOrderDetail() {
   return (
@@ -112,14 +112,26 @@ function Inner() {
                 <div className="font-bold">${it.lineTotal.toFixed(2)}</div>
               </div>
               {it.files.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {it.files.map((f) => (
-                    <Button key={f.id} asChild variant="outline" size="sm">
-                      <a href={apiPath(`/api/uploads/${f.id}/download`)} target="_blank" rel="noopener noreferrer">
-                        <FileDown className="w-3 h-3 mr-1" /> {f.originalName} ({(f.fileSize / 1024).toFixed(0)} KB)
-                      </a>
-                    </Button>
-                  ))}
+                <div className="mt-3 flex flex-wrap gap-2" data-testid={`admin-files-${it.id}`}>
+                  {it.files.map((f) => {
+                    const sideLabel = f.side === "front" ? "Front" : f.side === "back" ? "Back" : null;
+                    return (
+                      <Button key={f.id} asChild variant="outline" size="sm">
+                        <a href={apiPath(`/api/uploads/${f.id}/download`)} target="_blank" rel="noopener noreferrer">
+                          <FileDown className="w-3 h-3 mr-1" />
+                          {sideLabel && (
+                            <span className="mr-1 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                              {sideLabel}
+                            </span>
+                          )}
+                          {f.originalName}
+                          <span className="text-muted-foreground ml-1">
+                            ({(f.fileType || "file").toUpperCase().replace(/^IMAGE\//, "")} · {(f.fileSize / 1024).toFixed(0)} KB)
+                          </span>
+                        </a>
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </div>

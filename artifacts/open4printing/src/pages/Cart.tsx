@@ -3,9 +3,10 @@ import { useCart } from "@/hooks/use-cart";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, FileCheck2, Zap, Image as ImageIcon } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, FileCheck2, Zap, Image as ImageIcon, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { categories } from "@/data/products";
+import { formatFileSize, fileExtension } from "@/lib/api";
 
 export default function Cart() {
   useSeo({ title: "Your Cart", description: "Review your print order." });
@@ -68,17 +69,41 @@ export default function Cart() {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between border-t border-border pt-6">
-                  {item.fileName ? (
-                    <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                      <FileCheck2 className="w-4 h-4" /> 
-                      <span className="truncate max-w-[150px] sm:max-w-[200px]">{item.fileName}</span>
-                    </div>
-                  ) : (
-                    <div className="text-sm font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
-                      No artwork attached
-                    </div>
-                  )}
+                <div className="flex items-center justify-between border-t border-border pt-6 gap-4 flex-wrap">
+                  {(() => {
+                    const filesToShow = (item.files && item.files.length > 0)
+                      ? item.files
+                      : (item.fileName && item.uploadedFileId != null
+                          ? [{ id: item.uploadedFileId, name: item.fileName, size: 0, type: '' }]
+                          : []);
+                    if (filesToShow.length === 0) {
+                      return (
+                        <div className="text-sm font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
+                          No artwork attached
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="flex flex-col gap-1.5" data-testid={`cart-files-${item.id}`}>
+                        {filesToShow.map((f) => {
+                          const ext = (f.type || fileExtension(f.name)).toUpperCase();
+                          const sideLabel = f.side === 'front' ? 'Front' : f.side === 'back' ? 'Back' : null;
+                          return (
+                            <div key={f.id} className="flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                              {sideLabel && (
+                                <span className="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">{sideLabel}</span>
+                              )}
+                              <FileCheck2 className="w-4 h-4 shrink-0" />
+                              <span className="truncate max-w-[160px] sm:max-w-[220px]">{f.name}</span>
+                              <span className="text-[11px] text-emerald-700/70 dark:text-emerald-300/70 whitespace-nowrap">
+                                {ext.replace(/^\./, '') || 'FILE'}{f.size ? ` · ${formatFileSize(f.size)}` : ''}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
                   <div className="flex items-center gap-4">
                     <div className="flex items-center border border-border rounded-lg bg-background overflow-hidden">
@@ -127,14 +152,14 @@ export default function Cart() {
               </div>
             </div>
 
-            <Button size="lg" className="w-full h-16 text-xl rounded-2xl shadow-xl hover-elevate mb-6" onClick={handleCheckout}>
-              Request Order <ArrowRight className="w-5 h-5 ml-2" />
+            <Button size="lg" className="w-full h-16 text-xl rounded-2xl shadow-xl hover-elevate mb-6" onClick={handleCheckout} data-testid="cart-checkout">
+              Checkout <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
 
             <div className="space-y-4">
               <div className="flex items-start gap-3 text-sm text-muted-foreground">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                <p>Secure checkout powered by Stripe. We never store your credit card information.</p>
+                <p>Secure checkout. Your payment is processed over an encrypted connection and we never store your full card number.</p>
               </div>
               <div className="flex items-start gap-3 text-sm text-muted-foreground">
                 <Zap className="w-5 h-5 text-primary shrink-0" />

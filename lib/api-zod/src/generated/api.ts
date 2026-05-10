@@ -116,6 +116,13 @@ export const GetOrderByNumberResponse = zod.object({
           originalName: zod.string(),
           fileType: zod.string(),
           fileSize: zod.number(),
+          side: zod
+            .union([
+              zod.literal("front"),
+              zod.literal("back"),
+              zod.literal(null),
+            ])
+            .nullish(),
           uploadedAt: zod.coerce.date(),
         }),
       ),
@@ -263,6 +270,13 @@ export const GetAdminOrderResponse = zod.object({
           originalName: zod.string(),
           fileType: zod.string(),
           fileSize: zod.number(),
+          side: zod
+            .union([
+              zod.literal("front"),
+              zod.literal("back"),
+              zod.literal(null),
+            ])
+            .nullish(),
           uploadedAt: zod.coerce.date(),
         }),
       ),
@@ -342,6 +356,13 @@ export const UpdateAdminOrderResponse = zod.object({
           originalName: zod.string(),
           fileType: zod.string(),
           fileSize: zod.number(),
+          side: zod
+            .union([
+              zod.literal("front"),
+              zod.literal("back"),
+              zod.literal(null),
+            ])
+            .nullish(),
           uploadedAt: zod.coerce.date(),
         }),
       ),

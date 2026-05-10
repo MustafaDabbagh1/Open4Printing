@@ -9,9 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronRight, Upload, Info, Check, Image as ImageIcon, ShieldCheck, Clock, Zap } from "lucide-react";
+import { ChevronRight, Upload, Info, Check, Image as ImageIcon, ShieldCheck, Clock, Zap, X, RefreshCw } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
+import BusinessCardPreview from "@/components/BusinessCardPreview";
+import { uploadFile, ACCEPT_FILE_TYPES, isAllowedFile, formatFileSize, fileExtension } from "@/lib/api";
+import type { CartFile } from "@/hooks/use-cart";
+
+interface UploadedSlot {
+  file: File;
+  uploaded?: { id: number; fileType: string; fileSize: number };
+  uploading: boolean;
+  error?: string;
+}
 
 export default function Product() {
   const { slug } = useParams<{ slug: string }>();
@@ -29,9 +39,10 @@ export default function Product() {
   const [turnaround, setTurnaround] = useState(product?.turnaroundOptions?.[0] || "");
   const [quantity, setQuantity] = useState("100");
   const [notes, setNotes] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [uploadedFileId, setUploadedFileId] = useState<number | undefined>(undefined);
-  const [uploading, setUploading] = useState(false);
+  const [frontSlot, setFrontSlot] = useState<UploadedSlot | null>(null);
+  const [backSlot, setBackSlot] = useState<UploadedSlot | null>(null);
+
+  const isBusinessCard = product?.categoryId === "business-cards";
 
   // Simple pricing formula
   const estimatedPrice = useMemo(() => {
@@ -64,48 +75,98 @@ export default function Product() {
     return <div className="container py-24 text-center text-2xl font-serif">Product not found.</div>;
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePickFile = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    side: 'front' | 'back' | undefined,
+    setter: (s: UploadedSlot | null) => void,
+  ) => {
     const picked = e.target.files?.[0];
+    e.target.value = "";
     if (!picked) return;
-    setFile(picked);
-    setUploadedFileId(undefined);
-    setUploading(true);
-    try {
-      const { uploadFile } = await import("@/lib/api");
-      const result = await uploadFile(picked);
-      setUploadedFileId(result.id);
+    if (!isAllowedFile(picked.name)) {
       toast({
-        title: "File uploaded",
-        description: `${picked.name} is ready for your order.`,
-      });
-    } catch (err) {
-      toast({
-        title: "Upload failed",
-        description: err instanceof Error ? err.message : "Please try again.",
+        title: "Unsupported file type",
+        description: "Allowed formats: PDF, PNG, JPG, JPEG, SVG, EPS, AI, PSD.",
         variant: "destructive",
       });
-      setFile(null);
-    } finally {
-      setUploading(false);
+      return;
+    }
+    setter({ file: picked, uploading: true });
+    try {
+      const result = await uploadFile(picked, side);
+      setter({
+        file: picked,
+        uploading: false,
+        uploaded: { id: result.id, fileType: result.fileType, fileSize: result.fileSize },
+      });
+      toast({
+        title: "File uploaded",
+        description: `${picked.name} (${formatFileSize(picked.size)}) is ready.`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Please try again.";
+      setter({ file: picked, uploading: false, error: message });
+      toast({ title: "Upload failed", description: message, variant: "destructive" });
     }
   };
 
+  const slotToCartFile = (slot: UploadedSlot | null, side?: 'front' | 'back'): CartFile | null => {
+    if (!slot || !slot.uploaded) return null;
+    return {
+      id: slot.uploaded.id,
+      name: slot.file.name,
+      size: slot.uploaded.fileSize,
+      type: slot.uploaded.fileType || fileExtension(slot.file.name),
+      ...(side ? { side } : {}),
+    };
+  };
+
   const handleAddToCart = () => {
+    if (!product) return;
+    if (isBusinessCard && (!frontSlot || !frontSlot.uploaded)) {
+      toast({
+        title: "Front design required",
+        description: "Please upload a front-side artwork file for your business cards before adding to cart.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (frontSlot?.uploading || backSlot?.uploading) {
+      toast({
+        title: "Upload still in progress",
+        description: "Please wait for your file upload to finish.",
+      });
+      return;
+    }
+    const files: CartFile[] = [];
+    if (isBusinessCard) {
+      const f = slotToCartFile(frontSlot, 'front');
+      const b = slotToCartFile(backSlot, 'back');
+      if (f) files.push(f);
+      if (b) files.push(b);
+    } else {
+      const f = slotToCartFile(frontSlot);
+      if (f) files.push(f);
+    }
+
+    const primary = files[0];
     addToCart({
       productId: product.id,
       name: product.name,
       unitPrice: estimatedPrice,
-      quantity: 1, // The "quantity" in options refers to print quantity per item, cart qty is 1 set
-      fileName: file?.name,
-      uploadedFileId,
+      quantity: 1,
+      isBusinessCard,
+      files,
+      ...(primary ? { fileName: primary.name, uploadedFileId: primary.id } : {}),
       options: {
         "Print Quantity": quantity,
         "Size": size,
         ...(material && { "Material": material }),
         ...(finish && { "Finish": finish }),
         "Turnaround": turnaround,
-        ...(notes && { "Notes": notes })
-      }
+        ...(isBusinessCard && backSlot?.uploaded ? { "Has Back Side": "Yes" } : {}),
+        ...(notes && { "Notes": notes }),
+      },
     });
 
     toast({
@@ -272,38 +333,41 @@ export default function Product() {
                 {/* Artwork Upload */}
                 <div className="space-y-4 pt-6 border-t border-border">
                   <div className="flex items-center justify-between">
-                    <Label className="text-base font-bold">Artwork</Label>
+                    <Label className="text-base font-bold">{isBusinessCard ? "Business Card Artwork" : "Artwork"}</Label>
                     <Link href="/help" className="text-sm text-primary hover:underline flex items-center gap-1">Need design help?</Link>
                   </div>
-                  
-                  {!file ? (
-                    <div className="relative border-2 border-dashed border-primary/30 bg-primary/5 rounded-2xl p-8 text-center hover:bg-primary/10 transition-colors cursor-pointer overflow-hidden">
-                      <input 
-                        type="file" 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                        onChange={handleFileUpload}
-                        accept=".pdf,.ai,.psd,.png,.jpg,.jpeg,.svg,.eps"
+
+                  {isBusinessCard ? (
+                    <div className="space-y-5">
+                      <BusinessCardPreview frontFile={frontSlot?.file ?? null} backFile={backSlot?.file ?? null} />
+                      <UploadSlotUI
+                        label="Front Side"
+                        slot={frontSlot}
+                        onPick={(e) => handlePickFile(e, 'front', setFrontSlot)}
+                        onClear={() => setFrontSlot(null)}
+                        testIdPrefix="front"
+                        required
                       />
-                      <Upload className="w-10 h-10 text-primary mx-auto mb-4" />
-                      <div className="font-bold text-lg mb-1">Click or drag to upload</div>
-                      <p className="text-sm text-muted-foreground">PDF, PSD, AI, PNG accepted</p>
+                      <UploadSlotUI
+                        label="Back Side (optional)"
+                        slot={backSlot}
+                        onPick={(e) => handlePickFile(e, 'back', setBackSlot)}
+                        onClear={() => setBackSlot(null)}
+                        testIdPrefix="back"
+                      />
                     </div>
                   ) : (
-                    <div className="border border-primary/30 bg-primary/5 rounded-2xl p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shrink-0">
-                          <Check className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-bold truncate">{file.name}</div>
-                          <div className="text-sm text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB • Ready for review</div>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={() => setFile(null)} className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0">Remove</Button>
-                    </div>
+                    <UploadSlotUI
+                      label="Upload your design"
+                      slot={frontSlot}
+                      onPick={(e) => handlePickFile(e, undefined, setFrontSlot)}
+                      onClear={() => setFrontSlot(null)}
+                      testIdPrefix="art"
+                    />
                   )}
+
                   <p className="text-xs text-muted-foreground flex items-start gap-2 mt-2">
-                    <Info className="w-4 h-4 shrink-0" /> We manually review every file before printing to ensure perfect results.
+                    <Info className="w-4 h-4 shrink-0" /> Accepted formats: PDF, PNG, JPG, JPEG, SVG, EPS, AI, PSD (max 50 MB). We manually review every file before printing.
                   </p>
                 </div>
               </div>
@@ -354,6 +418,75 @@ export default function Product() {
           </Accordion>
         </div>
       </div>
+    </div>
+  );
+}
+
+function UploadSlotUI({
+  label,
+  slot,
+  onPick,
+  onClear,
+  testIdPrefix,
+  required,
+}: {
+  label: string;
+  slot: UploadedSlot | null;
+  onPick: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClear: () => void;
+  testIdPrefix: string;
+  required?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+        {label}
+        {required && <span className="text-xs text-muted-foreground">(required)</span>}
+      </div>
+      {!slot ? (
+        <label className="relative block border-2 border-dashed border-primary/30 bg-primary/5 rounded-2xl p-6 text-center hover:bg-primary/10 transition-colors cursor-pointer overflow-hidden">
+          <input
+            type="file"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onChange={onPick}
+            accept={ACCEPT_FILE_TYPES}
+            data-testid={`upload-${testIdPrefix}`}
+          />
+          <Upload className="w-7 h-7 text-primary mx-auto mb-2" />
+          <div className="font-semibold text-sm">Click or drag to upload</div>
+          <p className="text-xs text-muted-foreground mt-0.5">PDF · PNG · JPG · SVG · EPS · AI · PSD</p>
+        </label>
+      ) : (
+        <div className="border border-primary/30 bg-primary/5 rounded-2xl p-4 flex items-center justify-between gap-3" data-testid={`uploaded-${testIdPrefix}`}>
+          <div className="flex items-center gap-3 overflow-hidden min-w-0">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${slot.uploading ? "bg-muted text-muted-foreground" : slot.error ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"}`}>
+              {slot.uploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : slot.error ? <X className="w-5 h-5" /> : <Check className="w-5 h-5" />}
+            </div>
+            <div className="min-w-0">
+              <div className="font-bold truncate text-sm" data-testid={`uploaded-${testIdPrefix}-name`}>{slot.file.name}</div>
+              <div className="text-xs text-muted-foreground">
+                {formatFileSize(slot.file.size)} · {fileExtension(slot.file.name).toUpperCase() || "file"}
+                {slot.uploading ? " · uploading…" : slot.error ? ` · ${slot.error}` : " · ready"}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <label className="cursor-pointer">
+              <input type="file" className="hidden" onChange={onPick} accept={ACCEPT_FILE_TYPES} />
+              <span className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md hover:bg-muted">Replace</span>
+            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClear}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              data-testid={`remove-${testIdPrefix}`}
+            >
+              Remove
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

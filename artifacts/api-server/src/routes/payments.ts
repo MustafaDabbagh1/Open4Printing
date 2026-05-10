@@ -23,7 +23,7 @@ router.post("/payments/authorize-net/charge", async (req, res): Promise<void> =>
     res.status(400).json({ error: "Order not found" });
     return;
   }
-  if (order.paymentStatus === "paid") {
+  if (order.paymentStatus === "paid" || order.paymentStatus === "test_paid") {
     res.status(409).json({ error: "Order is already paid" });
     return;
   }
@@ -41,10 +41,10 @@ router.post("/payments/authorize-net/charge", async (req, res): Promise<void> =>
     rawResponse: result.rawResponse,
   });
 
-  if (result.paymentStatus === "paid") {
+  if (result.paymentStatus === "paid" || result.paymentStatus === "test_paid") {
     await db
       .update(ordersTable)
-      .set({ paymentStatus: "paid" })
+      .set({ paymentStatus: result.paymentStatus })
       .where(eq(ordersTable.id, orderId));
     sendPaymentConfirmationEmail({
       orderNumber: order.orderNumber,
@@ -52,6 +52,11 @@ router.post("/payments/authorize-net/charge", async (req, res): Promise<void> =>
       firstName: "",
       total: Number(order.total),
     }).catch((err) => req.log.error({ err }, "Payment email failed"));
+  } else if (result.paymentStatus === "pending_authorize_net_connection") {
+    await db
+      .update(ordersTable)
+      .set({ paymentStatus: "pending_authorize_net_connection" })
+      .where(eq(ordersTable.id, orderId));
   } else if (result.paymentStatus === "failed") {
     await db
       .update(ordersTable)

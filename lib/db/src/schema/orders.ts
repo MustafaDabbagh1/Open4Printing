@@ -15,6 +15,8 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const PAYMENT_STATUSES = [
   "pending_payment",
+  "pending_authorize_net_connection",
+  "test_paid",
   "paid",
   "failed",
   "refunded",

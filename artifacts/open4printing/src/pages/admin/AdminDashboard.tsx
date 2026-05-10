@@ -14,6 +14,8 @@ const STATUS_LABELS: Record<string, string> = {
 };
 const PAYMENT_LABELS: Record<string, string> = {
   pending_payment: "Pending payment",
+  pending_authorize_net_connection: "Awaiting Authorize.net connection",
+  test_paid: "Test paid (demo)",
   paid: "Paid",
   failed: "Failed",
   refunded: "Refunded",
@@ -87,11 +89,11 @@ function Inner() {
 export function StatusPill({ status, kind }: { status: string; kind: "order" | "payment" }) {
   const label = kind === "order" ? STATUS_LABELS[status] ?? status : PAYMENT_LABELS[status] ?? status;
   const color =
-    status === "paid" || status === "completed" || status === "shipped"
+    status === "paid" || status === "test_paid" || status === "completed" || status === "shipped"
       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
       : status === "failed" || status === "cancelled"
         ? "bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-300"
-        : status === "pending_payment" || status === "new" || status === "awaiting_artwork_review"
+        : status === "pending_payment" || status === "pending_authorize_net_connection" || status === "new" || status === "awaiting_artwork_review"
           ? "bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
           : "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-300";
   return <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${color}`}>{label}</span>;

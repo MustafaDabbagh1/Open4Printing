@@ -207,6 +207,7 @@ router.get("/orders/:orderNumber", async (req, res): Promise<void> => {
           originalName: f.originalName,
           fileType: f.fileType,
           fileSize: f.fileSize,
+          side: f.side ?? null,
           uploadedAt: f.uploadedAt,
         })),
       })),

@@ -35,7 +35,7 @@ export interface AuthorizeNetChargeOutput {
   transactionId: string | null;
   message: string;
   /** Mapped to our internal payment status enum. */
-  paymentStatus: "paid" | "pending_payment" | "failed";
+  paymentStatus: "paid" | "test_paid" | "pending_payment" | "pending_authorize_net_connection" | "failed";
   rawResponse: Record<string, unknown>;
 }
 
@@ -80,7 +80,7 @@ export async function chargeCard(input: AuthorizeNetChargeInput): Promise<Author
       success: true,
       transactionId: `TEST-${Date.now()}-${input.orderId}`,
       message: "Test payment accepted (Authorize.net not configured).",
-      paymentStatus: "paid",
+      paymentStatus: "test_paid",
       rawResponse: { mode: "test_demo" },
     };
   }
@@ -146,8 +146,8 @@ export async function chargeCard(input: AuthorizeNetChargeInput): Promise<Author
   return {
     success: true,
     transactionId: null,
-    message: "Authorize.net integration is configured but not yet implemented. Order kept as pending_payment.",
-    paymentStatus: "pending_payment",
+    message: "Authorize.net integration is configured but not yet implemented. Order awaiting connection.",
+    paymentStatus: "pending_authorize_net_connection",
     rawResponse: { mode: "configured_but_not_implemented" },
   };
 }

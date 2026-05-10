@@ -2,6 +2,9 @@ import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export const FILE_SIDES = ["front", "back"] as const;
+export type FileSide = (typeof FILE_SIDES)[number];
+
 export const uploadedFilesTable = pgTable("uploaded_files", {
   id: serial("id").primaryKey(),
   orderId: integer("order_id"),
@@ -10,6 +13,7 @@ export const uploadedFilesTable = pgTable("uploaded_files", {
   fileType: text("file_type").notNull(),
   fileSize: integer("file_size").notNull(),
   storagePath: text("storage_path").notNull(),
+  side: text("side").$type<FileSide | null>(),
   uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -148,6 +148,7 @@ async function loadOrderDetail(orderId: number) {
         originalName: f.originalName,
         fileType: f.fileType,
         fileSize: f.fileSize,
+        side: f.side ?? null,
         uploadedAt: f.uploadedAt,
       })),
     })),
@@ -225,7 +226,7 @@ router.patch("/admin/orders/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  if (updates.paymentStatus === "paid") {
+  if (updates.paymentStatus === "paid" || updates.paymentStatus === "test_paid") {
     sendPaymentConfirmationEmail({
       orderNumber: updated.orderNumber,
       email: updated.email,

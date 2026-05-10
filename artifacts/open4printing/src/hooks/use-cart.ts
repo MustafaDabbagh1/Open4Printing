@@ -1,29 +1,63 @@
 import { useState, useEffect } from 'react';
 
+export interface CartFile {
+  id: number;
+  name: string;
+  size: number;
+  type: string;
+  side?: 'front' | 'back';
+}
+
 export interface CartItem {
   id: string;
   productId: string;
   name: string;
   options: Record<string, string>;
   quantity: number;
+  unitPrice: number;
+  notes?: string;
+  isBusinessCard?: boolean;
+  files?: CartFile[];
   fileName?: string;
   uploadedFileId?: number;
-  unitPrice: number;
+}
+
+const STORAGE_KEY = 'open4printing-cart';
+
+function readStored(): CartItem[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((it: CartItem): CartItem => {
+      if (!it.files && it.uploadedFileId != null && it.fileName) {
+        return {
+          ...it,
+          files: [{ id: it.uploadedFileId, name: it.fileName, size: 0, type: '' }],
+        };
+      }
+      return it;
+    });
+  } catch {
+    return [];
+  }
 }
 
 export function useCart() {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      const stored = localStorage.getItem('open4printing-cart');
-      return stored ? JSON.parse(stored) : [];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [items, setItems] = useState<CartItem[]>(() => readStored());
 
   useEffect(() => {
-    localStorage.setItem('open4printing-cart', JSON.stringify(items));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) setItems(readStored());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const addToCart = (item: Omit<CartItem, 'id'>) => {
     const id = crypto.randomUUID();

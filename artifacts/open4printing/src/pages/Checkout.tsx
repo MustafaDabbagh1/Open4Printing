@@ -113,15 +113,20 @@ export default function Checkout() {
           tax,
           shipping,
           total,
-          items: items.map((it) => ({
-            productSlug: slugFor(it.productId),
-            productName: it.name,
-            quantity: it.quantity,
-            unitPrice: +it.unitPrice.toFixed(2),
-            lineTotal: +(it.unitPrice * it.quantity).toFixed(2),
-            options: it.options,
-            uploadedFileIds: it.uploadedFileId != null ? [it.uploadedFileId] : [],
-          })),
+          items: items.map((it) => {
+            const ids = (it.files && it.files.length > 0)
+              ? it.files.map((f) => f.id)
+              : (it.uploadedFileId != null ? [it.uploadedFileId] : []);
+            return {
+              productSlug: slugFor(it.productId),
+              productName: it.name,
+              quantity: it.quantity,
+              unitPrice: +it.unitPrice.toFixed(2),
+              lineTotal: +(it.unitPrice * it.quantity).toFixed(2),
+              options: it.options,
+              uploadedFileIds: ids,
+            };
+          }),
         },
       });
     } catch (err) {
@@ -294,9 +299,14 @@ export default function Checkout() {
                           {Object.entries(it.options).map(([k, v]) => `${k}: ${v}`).join(" • ")}
                         </div>
                       )}
-                      {it.fileName && (
-                        <div className="text-xs text-emerald-700 mt-0.5 truncate">📎 {it.fileName}</div>
-                      )}
+                      {(it.files && it.files.length > 0
+                        ? it.files
+                        : (it.fileName && it.uploadedFileId != null ? [{ id: it.uploadedFileId, name: it.fileName, side: undefined as 'front' | 'back' | undefined }] : [])
+                      ).map((f) => (
+                        <div key={f.id} className="text-xs text-emerald-700 mt-0.5 truncate">
+                          📎 {f.side ? `[${f.side === 'front' ? 'Front' : 'Back'}] ` : ''}{f.name}
+                        </div>
+                      ))}
                     </div>
                     <div className="font-semibold whitespace-nowrap">${(it.unitPrice * it.quantity).toFixed(2)}</div>
                   </div>

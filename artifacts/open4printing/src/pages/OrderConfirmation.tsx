@@ -58,10 +58,19 @@ export default function OrderConfirmation() {
         </div>
       </div>
 
-      {data.paymentStatus === "paid" ? (
+      {(data.paymentStatus === "paid" || data.paymentStatus === "test_paid") ? (
         <div className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 rounded-2xl p-6 mb-8">
-          <h3 className="font-bold mb-2">Payment received</h3>
-          <p className="text-sm">Thanks! Your payment was successfully processed. Our team will review your files within 4 business hours and send a production update by email.</p>
+          <h3 className="font-bold mb-2">Payment received{data.paymentStatus === "test_paid" ? " (test mode)" : ""}</h3>
+          <p className="text-sm">
+            Thanks! Your payment was successfully processed
+            {data.paymentStatus === "test_paid" ? " in demo/test mode (Authorize.net not yet connected)" : ""}
+            . Our team will review your files within 4 business hours and send a production update by email.
+          </p>
+        </div>
+      ) : data.paymentStatus === "pending_authorize_net_connection" ? (
+        <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800 rounded-2xl p-6 mb-8">
+          <h3 className="font-bold mb-2">Awaiting payment processor connection</h3>
+          <p className="text-sm">Your order has been saved. Authorize.net is configured but not yet connected, so our team will follow up to finalize payment.</p>
         </div>
       ) : (
         <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800 rounded-2xl p-6 mb-8">

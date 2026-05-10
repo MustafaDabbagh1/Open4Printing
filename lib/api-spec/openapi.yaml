@@ -409,6 +409,9 @@ components:
         originalName: { type: string }
         fileType: { type: string }
         fileSize: { type: integer }
+        side:
+          type: ["string", "null"]
+          enum: [front, back, null]
         uploadedAt: { type: string, format: date-time }
       required: [id, originalName, fileType, fileSize, uploadedAt]
 

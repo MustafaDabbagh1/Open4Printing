@@ -62,11 +62,25 @@ export interface OrderConfirmation {
   orderStatus: string;
 }
 
+/**
+ * @nullable
+ */
+export type UploadedFileInfoSide =
+  | (typeof UploadedFileInfoSide)[keyof typeof UploadedFileInfoSide]
+  | null;
+
+export const UploadedFileInfoSide = {
+  front: "front",
+  back: "back",
+} as const;
+
 export interface UploadedFileInfo {
   id: number;
   originalName: string;
   fileType: string;
   fileSize: number;
+  /** @nullable */
+  side?: UploadedFileInfoSide;
   uploadedAt: string;
 }
 

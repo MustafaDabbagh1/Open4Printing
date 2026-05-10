@@ -27,3 +27,4 @@ export * from "./paymentInfo";
 export * from "./updateOrderBody";
 export * from "./updateProductBody";
 export * from "./uploadedFileInfo";
+export * from "./uploadedFileInfoSide";

@@ -5,11 +5,14 @@
  * Open4Printing API
  * OpenAPI spec version: 0.1.0
  */
+import type { UploadedFileInfoSide } from "./uploadedFileInfoSide";
 
 export interface UploadedFileInfo {
   id: number;
   originalName: string;
   fileType: string;
   fileSize: number;
+  /** @nullable */
+  side?: UploadedFileInfoSide;
   uploadedAt: Date;
 }

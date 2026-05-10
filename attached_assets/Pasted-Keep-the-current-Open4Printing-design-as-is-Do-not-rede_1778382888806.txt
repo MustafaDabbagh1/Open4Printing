@@ -1,0 +1,211 @@
+Keep the current Open4Printing design as-is. Do not redesign the website visually right now.
+
+Focus only on fixing and completing the functionality for the ecommerce checkout, cart, file uploads, and business card image preview.
+
+Main goal:
+Customers should be able to choose a product, upload their artwork, see a preview when possible, add it to cart, check out normally, and have the full order saved in the backend so the admin can view it.
+
+1. Cart functionality
+Fix the cart so it properly stores:
+- product name
+- product ID/slug
+- selected product options
+- quantity
+- price
+- uploaded artwork file info
+- customer notes
+- business card preview info if applicable
+
+The cart should persist when the customer navigates between pages or refreshes the page.
+
+2. File upload functionality
+Make the file upload actually work throughout the customer flow.
+
+Allow these file types:
+- PDF
+- PNG
+- JPG
+- JPEG
+- SVG
+- EPS
+- AI
+- PSD
+
+File upload requirements:
+- Show uploaded file name
+- Show file size
+- Show file type
+- Allow customer to remove and replace the file
+- Attach uploaded files to the specific cart item, not just the whole cart
+- Save uploaded file metadata with the final order
+- Make the upload ready to later connect to cloud storage like Cloudflare R2, S3, or similar
+
+3. Business card preview
+For all business card products, add a live preview feature.
+
+When a customer uploads an image/design for business cards:
+- Show the uploaded design inside a business card preview mockup
+- Use a standard business card ratio, around 3.5 x 2 inches
+- The preview should maintain the correct card shape
+- The image should fit inside the card preview
+- Add options:
+  - Front side upload
+  - Back side upload, optional
+- Add tabs or toggle buttons:
+  - Front Preview
+  - Back Preview
+- If only the front is uploaded, show only the front preview
+- Add a small note: “Preview is for reference only. Final print quality depends on uploaded file resolution.”
+
+Important:
+Do not make the preview overly complicated. I just want customers to visually see their uploaded business card design on a card before checkout.
+
+4. Product page upload flow
+On business card product pages, the customer should be able to:
+- Select size
+- Select paper type
+- Select finish
+- Select quantity
+- Upload front design
+- Upload back design if needed
+- See business card preview
+- Add to cart
+
+For other products, the customer should be able to:
+- Select available options
+- Upload artwork
+- Add to cart
+
+5. Checkout functionality
+Keep the checkout as a normal ecommerce checkout.
+
+Checkout sections should be:
+- Contact Information
+- Shipping Address
+- Billing Address
+- Order Summary
+- Payment
+- Place Order button
+
+Do not show any message saying a payment link will be emailed later.
+
+Payment section should look like a normal card payment form:
+- Card number
+- Expiration date
+- CVV
+- Name on card
+- Billing ZIP code
+
+For now, payment can run in test/demo mode until Authorize.net is connected.
+
+When the customer clicks Place Order:
+- Validate required fields
+- Validate cart is not empty
+- Validate required artwork uploads where needed
+- Create the order in the backend/database
+- Save all product options and file metadata
+- Save payment status as test_paid or pending_authorize_net_connection
+- Show an order confirmation page with an order number
+
+6. Authorize.net readiness
+Keep the backend prepared for Authorize.net.
+
+Use backend-only environment variables:
+- AUTHORIZE_NET_API_LOGIN_ID
+- AUTHORIZE_NET_TRANSACTION_KEY
+- AUTHORIZE_NET_ENVIRONMENT
+
+Create or keep a backend payment route like:
+- /api/payments/authorize-net/charge
+
+Do not expose Authorize.net keys on the frontend.
+
+If no real Authorize.net credentials exist, the site should still let me test the checkout in demo mode.
+
+7. Admin order dashboard
+Make sure admin can log in and see all customer orders.
+
+Admin login should be:
+Username: Ibrahim
+Password: 123456
+
+Admin URL should be:
+ /admin/login
+
+After login, redirect to:
+ /admin/dashboard
+
+Admin dashboard must show:
+- all orders
+- order number
+- customer name
+- customer email
+- phone number
+- products ordered
+- selected options
+- uploaded file names
+- business card front/back uploads if applicable
+- order total
+- payment status
+- order status
+- order date
+
+Admin should be able to click an order and view the full details.
+
+8. Admin file viewing
+In each order detail page, show the uploaded artwork information clearly.
+
+For uploaded files, show:
+- original file name
+- file type
+- file size
+- upload date
+- product it belongs to
+- front or back side if it is a business card
+
+If possible, allow admin to open/download the uploaded file.
+
+9. Order statuses
+Use these order statuses:
+- new
+- awaiting_artwork_review
+- in_production
+- ready_for_pickup
+- shipped
+- completed
+- cancelled
+
+Use these payment statuses:
+- pending_authorize_net_connection
+- test_paid
+- paid
+- failed
+- refunded
+- cancelled
+
+10. Do not change the design
+Do not redesign the homepage, header, catalog cards, or overall visual style.
+
+Only improve:
+- cart functionality
+- upload functionality
+- business card preview
+- checkout functionality
+- backend order saving
+- admin order viewing
+
+Final test checklist:
+After finishing, test this full flow:
+
+1. Open a business card product
+2. Select options
+3. Upload a front design
+4. See the business card preview
+5. Add to cart
+6. Go to checkout
+7. Enter customer/shipping/payment info
+8. Place the order
+9. See confirmation page with order number
+10. Log into /admin/login with Ibrahim / 123456
+11. Confirm the order appears in the dashboard
+12. Open the order and confirm uploaded files and selected options are visible

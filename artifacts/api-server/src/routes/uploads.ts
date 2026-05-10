@@ -58,6 +58,10 @@ router.post("/uploads", upload.single("file"), async (req: Request, res): Promis
     return;
   }
 
+  const rawSide = typeof req.body?.side === "string" ? req.body.side.toLowerCase() : null;
+  const side: "front" | "back" | null =
+    rawSide === "front" || rawSide === "back" ? rawSide : null;
+
   const [row] = await db
     .insert(uploadedFilesTable)
     .values({
@@ -67,6 +71,7 @@ router.post("/uploads", upload.single("file"), async (req: Request, res): Promis
       fileType: file.mimetype || path.extname(file.originalname).slice(1),
       fileSize: file.size,
       storagePath: file.filename,
+      side,
     })
     .returning();
 
@@ -80,6 +85,7 @@ router.post("/uploads", upload.single("file"), async (req: Request, res): Promis
     originalName: row.originalName,
     fileType: row.fileType,
     fileSize: row.fileSize,
+    side: row.side,
     uploadedAt: row.uploadedAt.toISOString(),
   });
 });
