@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db, adminUsersTable, productsTable } from "@workspace/db";
+import { db, adminUsersTable, productsTable, couponsTable, type ProductUploadConfig } from "@workspace/db";
 import { hashPassword } from "./auth";
 import { logger } from "./logger";
 
@@ -140,9 +140,53 @@ const SEED_PRODUCTS: SeedProduct[] = [
   { slug: "custom-design-request", name: "Custom Design Request", categorySlug: "design-services", shortDescription: "Tell us what you need — we'll design it from scratch.", startingPrice: 149.99 },
 ];
 
+function defaultUploadConfigFor(categorySlug: string, productSlug: string): ProductUploadConfig {
+  // Categories where we don't expect customer artwork by default
+  const noArtworkCategories = new Set(["design-services", "logo-websites-social"]);
+  if (noArtworkCategories.has(categorySlug)) {
+    return {
+      artworkRequired: false,
+      allowsBackUpload: false,
+      preferredFormats: ["pdf", "ai", "psd", "png", "jpg"],
+      notes: "Optional — upload reference materials if you have them.",
+    };
+  }
+  if (categorySlug === "business-cards") {
+    return {
+      artworkRequired: true,
+      allowsBackUpload: true,
+      preferredFormats: ["pdf", "ai", "png", "jpg"],
+      notes: "300dpi recommended. 3.5\" x 2\" with 0.125\" bleed.",
+    };
+  }
+  if (categorySlug === "signs-banners-posters") {
+    return {
+      artworkRequired: true,
+      allowsBackUpload: false,
+      preferredFormats: ["pdf", "ai", "eps"],
+      notes: "Large format — vector preferred. Outline fonts before uploading.",
+    };
+  }
+  if (productSlug.includes("brochure") || productSlug.includes("folded")) {
+    return {
+      artworkRequired: true,
+      allowsBackUpload: true,
+      preferredFormats: ["pdf", "ai"],
+      notes: "Multi-panel — please supply both inside and outside spreads.",
+    };
+  }
+  return {
+    artworkRequired: true,
+    allowsBackUpload: false,
+    preferredFormats: ["pdf", "png", "jpg"],
+    notes: "300dpi minimum. Include 0.125\" bleed.",
+  };
+}
+
 export async function seedProducts(): Promise<void> {
   let inserted = 0;
   for (const p of SEED_PRODUCTS) {
+    const uploadConfig = defaultUploadConfigFor(p.categorySlug, p.slug);
     await db
       .insert(productsTable)
       .values({
@@ -152,17 +196,32 @@ export async function seedProducts(): Promise<void> {
         shortDescription: p.shortDescription,
         startingPrice: p.startingPrice.toFixed(2),
         enabled: true,
+        uploadConfig,
       })
       .onConflictDoNothing({ target: productsTable.slug });
+
+    // Backfill upload_config for products inserted before this column existed.
+    await db
+      .update(productsTable)
+      .set({ uploadConfig })
+      .where(eq(productsTable.slug, p.slug));
     inserted++;
   }
   logger.info({ count: inserted }, "Seeded products");
+}
+
+export async function seedCoupons(): Promise<void> {
+  await db
+    .insert(couponsTable)
+    .values({ code: "SAVE10", description: "10% off your order", percentOff: 10, active: true })
+    .onConflictDoNothing({ target: couponsTable.code });
 }
 
 export async function runSeeds(): Promise<void> {
   try {
     await seedAdminUser();
     await seedProducts();
+    await seedCoupons();
   } catch (err) {
     logger.error({ err }, "Seeding failed");
   }

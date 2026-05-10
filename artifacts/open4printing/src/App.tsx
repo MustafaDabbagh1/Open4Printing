@@ -13,11 +13,18 @@ import Upload from "@/pages/Upload";
 import Help from "@/pages/Help";
 import Checkout from "@/pages/Checkout";
 import OrderConfirmation from "@/pages/OrderConfirmation";
+import Quote from "@/pages/Quote";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminOrderDetail from "@/pages/admin/AdminOrderDetail";
 import AdminProducts from "@/pages/admin/AdminProducts";
+import AdminQuotes from "@/pages/admin/AdminQuotes";
+import AdminQuoteDetail from "@/pages/admin/AdminQuoteDetail";
+import CustomerLogin from "@/pages/account/CustomerLogin";
+import CustomerRegister from "@/pages/account/CustomerRegister";
+import CustomerOrders from "@/pages/account/CustomerOrders";
+import CustomerAddresses from "@/pages/account/CustomerAddresses";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +37,8 @@ function Router() {
       <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/orders/:id" component={AdminOrderDetail} />
       <Route path="/admin/products" component={AdminProducts} />
+      <Route path="/admin/quotes" component={AdminQuotes} />
+      <Route path="/admin/quotes/:id" component={AdminQuoteDetail} />
       <Route>
         <Layout>
           <Switch>
@@ -39,8 +48,13 @@ function Router() {
             <Route path="/cart" component={Cart} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-confirmation/:orderNumber" component={OrderConfirmation} />
+            <Route path="/quote" component={Quote} />
             <Route path="/upload" component={Upload} />
             <Route path="/help" component={Help} />
+            <Route path="/account/login" component={CustomerLogin} />
+            <Route path="/account/register" component={CustomerRegister} />
+            <Route path="/account/orders" component={CustomerOrders} />
+            <Route path="/account/addresses" component={CustomerAddresses} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

@@ -10,6 +10,8 @@ import type { OrderSummary } from "./orderSummary";
 export interface AdminDashboardStats {
   totalOrders: number;
   newOrders: number;
+  awaitingArtworkReviewOrders: number;
+  proofPendingOrders: number;
   pendingPaymentOrders: number;
   paidOrders: number;
   inProductionOrders: number;

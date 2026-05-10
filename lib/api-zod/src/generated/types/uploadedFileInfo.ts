@@ -14,5 +14,6 @@ export interface UploadedFileInfo {
   fileSize: number;
   /** @nullable */
   side?: UploadedFileInfoSide;
+  isProof?: boolean;
   uploadedAt: Date;
 }

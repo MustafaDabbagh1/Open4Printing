@@ -3,16 +3,24 @@ import { useLocation } from "wouter";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useSeo } from "@/hooks/use-seo";
-import { useCreateOrder, useChargeAuthorizeNet } from "@workspace/api-client-react";
+import { useCreateOrder, useChargeAuthorizeNet, useValidateCoupon } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ShieldCheck, Lock, CreditCard, Truck, Store } from "lucide-react";
+import { ShieldCheck, Lock, CreditCard, Truck, Store, Tag } from "lucide-react";
 import { products as catalogProducts } from "@/data/products";
 
 const TAX_RATE = 0.0875;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ZIP_RE = /^[A-Za-z0-9 -]{3,10}$/;
+
+interface AppliedCoupon {
+  code: string;
+  description: string;
+  discountAmount: number;
+}
 
 export default function Checkout() {
   useSeo({ title: "Checkout", description: "Place your print order." });
@@ -21,21 +29,20 @@ export default function Checkout() {
   const { toast } = useToast();
   const createOrder = useCreateOrder();
   const charge = useChargeAuthorizeNet();
+  const validateCoupon = useValidateCoupon();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
   const [delivery, setDelivery] = useState<"shipping" | "pickup">("shipping");
-
+  const [pickupInstructions, setPickupInstructions] = useState("");
   const [shipLine1, setShipLine1] = useState("");
   const [shipLine2, setShipLine2] = useState("");
   const [shipCity, setShipCity] = useState("");
   const [shipState, setShipState] = useState("");
   const [shipPostal, setShipPostal] = useState("");
   const [shipCountry, setShipCountry] = useState("US");
-
   const [billSame, setBillSame] = useState(true);
   const [billLine1, setBillLine1] = useState("");
   const [billLine2, setBillLine2] = useState("");
@@ -43,18 +50,20 @@ export default function Checkout() {
   const [billState, setBillState] = useState("");
   const [billPostal, setBillPostal] = useState("");
   const [billCountry, setBillCountry] = useState("US");
-
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
   const [cardZip, setCardZip] = useState("");
-
   const [notes, setNotes] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
+  const discount = appliedCoupon?.discountAmount ?? 0;
   const shipping = delivery === "pickup" ? 0 : subtotal > 100 ? 0 : 15.99;
-  const tax = +(subtotal * TAX_RATE).toFixed(2);
-  const total = +(subtotal + shipping + tax).toFixed(2);
+  const taxableBase = Math.max(0, subtotal - discount);
+  const tax = +(taxableBase * TAX_RATE).toFixed(2);
+  const total = +(taxableBase + shipping + tax).toFixed(2);
 
   if (items.length === 0) {
     return (
@@ -73,15 +82,62 @@ export default function Checkout() {
   const formatExpiryForApi = (raw: string): string => {
     const digits = raw.replace(/\D/g, "");
     if (digits.length < 4) return digits;
-    return digits.slice(0, 4); // MMYY
+    return digits.slice(0, 4);
+  };
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    try {
+      const result = await validateCoupon.mutateAsync({
+        data: { code, subtotal: +subtotal.toFixed(2) },
+      });
+      setAppliedCoupon({
+        code: result.code,
+        description: result.description,
+        discountAmount: Number(result.discountAmount),
+      });
+      toast({ title: "Coupon applied", description: `${result.description} — saved $${Number(result.discountAmount).toFixed(2)}` });
+    } catch (err) {
+      setAppliedCoupon(null);
+      toast({
+        title: "Invalid coupon",
+        description: err instanceof Error ? err.message : "That code didn't work.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const validateForm = (): string | null => {
+    if (!firstName.trim() || !lastName.trim()) return "Please enter your full name.";
+    if (!EMAIL_RE.test(email)) return "Please enter a valid email address.";
+    if (delivery === "shipping") {
+      if (!shipLine1.trim() || !shipCity.trim() || !shipState.trim()) return "Please complete the shipping address.";
+      if (!ZIP_RE.test(shipPostal.trim())) return "Please enter a valid ZIP / postal code.";
+    }
+    if (!billSame) {
+      if (!billLine1.trim() || !billCity.trim() || !billState.trim()) return "Please complete the billing address.";
+      if (!ZIP_RE.test(billPostal.trim())) return "Please enter a valid billing ZIP code.";
+    }
+    const cardDigits = cardNumber.replace(/\s+/g, "");
+    if (!/^\d{12,19}$/.test(cardDigits)) return "Please enter a valid card number.";
+    if (!/^\d{4}$/.test(formatExpiryForApi(cardExpiry))) return "Please enter the card expiration as MM/YY.";
+    if (!/^\d{3,4}$/.test(cardCvv)) return "Please enter your card CVV.";
+    if (!cardName.trim()) return "Please enter the name on the card.";
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      toast({ title: "Please review your order", description: validationError, variant: "destructive" });
+      return;
+    }
 
     const shippingAddress = {
       line1: delivery === "pickup" ? "Pickup in store" : shipLine1,
-      line2: delivery === "pickup" ? null : (shipLine2 || null),
+      line2: delivery === "pickup" ? null : shipLine2 || null,
       city: delivery === "pickup" ? "Pickup" : shipCity,
       state: delivery === "pickup" ? "Pickup" : shipState,
       postalCode: delivery === "pickup" ? "00000" : shipPostal,
@@ -108,15 +164,17 @@ export default function Checkout() {
           phone: phone || null,
           billingAddress,
           shippingAddress,
-          notes: notes ? `${delivery === "pickup" ? "[PICKUP] " : ""}${notes}` : (delivery === "pickup" ? "[PICKUP]" : ""),
+          notes: notes ?? "",
+          deliveryMethod: delivery,
+          pickupInstructions: delivery === "pickup" ? pickupInstructions : "",
+          discountCode: appliedCoupon?.code ?? null,
+          discountAmount: discount,
           subtotal: +subtotal.toFixed(2),
           tax,
           shipping,
           total,
           items: items.map((it) => {
-            const ids = (it.files && it.files.length > 0)
-              ? it.files.map((f) => f.id)
-              : (it.uploadedFileId != null ? [it.uploadedFileId] : []);
+            const ids = it.files && it.files.length > 0 ? it.files.map((f) => f.id) : it.uploadedFileId != null ? [it.uploadedFileId] : [];
             return {
               productSlug: slugFor(it.productId),
               productName: it.name,
@@ -130,11 +188,7 @@ export default function Checkout() {
         },
       });
     } catch (err) {
-      toast({
-        title: "Order failed",
-        description: err instanceof Error ? err.message : "Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Order failed", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
       return;
     }
 
@@ -149,13 +203,7 @@ export default function Checkout() {
         },
       });
     } catch (err) {
-      // Order was created — surface the issue but still let the customer reach
-      // the confirmation page so they have an order number to reference.
-      toast({
-        title: "Payment could not be completed",
-        description: err instanceof Error ? err.message : "We've saved your order; our team will follow up.",
-        variant: "destructive",
-      });
+      toast({ title: "Payment could not be completed", description: err instanceof Error ? err.message : "We've saved your order; our team will follow up.", variant: "destructive" });
     }
 
     clearCart();
@@ -181,22 +229,10 @@ export default function Checkout() {
 
             <Section title="Delivery">
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <DeliveryOption
-                  selected={delivery === "shipping"}
-                  onClick={() => setDelivery("shipping")}
-                  icon={Truck}
-                  label="Ship"
-                  sublabel={subtotal > 100 ? "Free over $100" : "$15.99"}
-                />
-                <DeliveryOption
-                  selected={delivery === "pickup"}
-                  onClick={() => setDelivery("pickup")}
-                  icon={Store}
-                  label="Pickup"
-                  sublabel="Free"
-                />
+                <DeliveryOption selected={delivery === "shipping"} onClick={() => setDelivery("shipping")} icon={Truck} label="Ship" sublabel={subtotal > 100 ? "Free over $100" : "$15.99"} />
+                <DeliveryOption selected={delivery === "pickup"} onClick={() => setDelivery("pickup")} icon={Store} label="Pickup" sublabel="Free" />
               </div>
-              {delivery === "shipping" && (
+              {delivery === "shipping" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="md:col-span-2"><Field label="Street address"><Input required value={shipLine1} onChange={(e) => setShipLine1(e.target.value)} /></Field></div>
                   <div className="md:col-span-2"><Field label="Apartment, suite, etc. (optional)"><Input value={shipLine2} onChange={(e) => setShipLine2(e.target.value)} /></Field></div>
@@ -205,6 +241,10 @@ export default function Checkout() {
                   <Field label="ZIP code"><Input required value={shipPostal} onChange={(e) => setShipPostal(e.target.value)} /></Field>
                   <Field label="Country"><Input required value={shipCountry} onChange={(e) => setShipCountry(e.target.value)} /></Field>
                 </div>
+              ) : (
+                <Field label="Pickup instructions (optional)">
+                  <Textarea rows={2} value={pickupInstructions} onChange={(e) => setPickupInstructions(e.target.value)} placeholder="Any preferred pickup time or contact details?" />
+                </Field>
               )}
             </Section>
 
@@ -225,54 +265,18 @@ export default function Checkout() {
               )}
             </Section>
 
-            <Section
-              title={
-                <span className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> Payment</span>
-              }
-            >
+            <Section title={<span className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> Payment</span>}>
               <div className="space-y-3">
                 <Field label="Card number">
-                  <Input
-                    required
-                    inputMode="numeric"
-                    autoComplete="cc-number"
-                    placeholder="1234 5678 9012 3456"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                    maxLength={23}
-                  />
+                  <Input required inputMode="numeric" autoComplete="cc-number" placeholder="1234 5678 9012 3456" value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} maxLength={23} />
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Expiration (MM/YY)">
-                    <Input
-                      required
-                      inputMode="numeric"
-                      autoComplete="cc-exp"
-                      placeholder="MM/YY"
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
-                      maxLength={5}
-                    />
-                  </Field>
-                  <Field label="CVV">
-                    <Input
-                      required
-                      inputMode="numeric"
-                      autoComplete="cc-csc"
-                      placeholder="123"
-                      value={cardCvv}
-                      onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                      maxLength={4}
-                    />
-                  </Field>
+                  <Field label="Expiration (MM/YY)"><Input required inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} maxLength={5} /></Field>
+                  <Field label="CVV"><Input required inputMode="numeric" autoComplete="cc-csc" placeholder="123" value={cardCvv} onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} maxLength={4} /></Field>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Name on card">
-                    <Input required autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} />
-                  </Field>
-                  <Field label="Billing ZIP">
-                    <Input required value={cardZip} onChange={(e) => setCardZip(e.target.value)} />
-                  </Field>
+                  <Field label="Name on card"><Input required autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value)} /></Field>
+                  <Field label="Billing ZIP"><Input required value={cardZip} onChange={(e) => setCardZip(e.target.value)} /></Field>
                 </div>
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
                   <Lock className="w-3 h-3" /> Payments will be securely processed. Your card details are not stored by Open4Printing.
@@ -301,29 +305,43 @@ export default function Checkout() {
                       )}
                       {(it.files && it.files.length > 0
                         ? it.files
-                        : (it.fileName && it.uploadedFileId != null ? [{ id: it.uploadedFileId, name: it.fileName, side: undefined as 'front' | 'back' | undefined }] : [])
+                        : it.fileName && it.uploadedFileId != null
+                          ? [{ id: it.uploadedFileId, name: it.fileName, side: undefined as "front" | "back" | undefined }]
+                          : []
                       ).map((f) => (
-                        <div key={f.id} className="text-xs text-emerald-700 mt-0.5 truncate">
-                          📎 {f.side ? `[${f.side === 'front' ? 'Front' : 'Back'}] ` : ''}{f.name}
-                        </div>
+                        <div key={f.id} className="text-xs text-emerald-700 mt-0.5 truncate">📎 {f.side ? `[${f.side === "front" ? "Front" : "Back"}] ` : ""}{f.name}</div>
                       ))}
                     </div>
                     <div className="font-semibold whitespace-nowrap">${(it.unitPrice * it.quantity).toFixed(2)}</div>
                   </div>
                 ))}
               </div>
+
+              <div className="pt-3 border-t border-border space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Tag className="w-3 h-3" /> Promo code</Label>
+                <div className="flex gap-2">
+                  <Input value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="e.g. SAVE10" disabled={Boolean(appliedCoupon)} />
+                  {appliedCoupon ? (
+                    <Button type="button" variant="outline" size="sm" onClick={() => { setAppliedCoupon(null); setCouponCode(""); }}>Remove</Button>
+                  ) : (
+                    <Button type="button" variant="outline" size="sm" onClick={handleApplyCoupon} disabled={validateCoupon.isPending || !couponCode.trim()}>{validateCoupon.isPending ? "…" : "Apply"}</Button>
+                  )}
+                </div>
+                {appliedCoupon && (
+                  <p className="text-xs text-emerald-700">{appliedCoupon.description} — −${appliedCoupon.discountAmount.toFixed(2)}</p>
+                )}
+              </div>
+
               <div className="space-y-1.5 text-sm border-t border-border pt-3">
                 <Row label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+                {discount > 0 && <Row label="Discount" value={`−$${discount.toFixed(2)}`} />}
                 <Row label={delivery === "pickup" ? "Pickup" : "Shipping"} value={shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`} />
                 <Row label={`Tax (${(TAX_RATE * 100).toFixed(2)}%)`} value={`$${tax.toFixed(2)}`} />
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Total</span><span>${total.toFixed(2)}</span>
                 </div>
               </div>
-              <Button type="submit" size="lg" disabled={isPlacing} className="w-full h-12 rounded-lg text-base">
-                {isPlacing ? "Placing order…" : `Place order — $${total.toFixed(2)}`}
-              </Button>
+              <Button type="submit" size="lg" disabled={isPlacing} className="w-full h-12 rounded-lg text-base">{isPlacing ? "Placing order…" : `Place order — $${total.toFixed(2)}`}</Button>
               <div className="flex items-start gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                 <p>Every order is reviewed by a real person before we print. We'll reach out if anything looks off.</p>
@@ -356,26 +374,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-muted-foreground">
-      <span>{label}</span>
-      <span className="text-foreground">{value}</span>
-    </div>
+    <div className="flex justify-between text-muted-foreground"><span>{label}</span><span className="text-foreground">{value}</span></div>
   );
 }
 
-function DeliveryOption({ selected, onClick, icon: Icon, label, sublabel }: {
-  selected: boolean;
-  onClick: () => void;
-  icon: typeof Truck;
-  label: string;
-  sublabel: string;
-}) {
+function DeliveryOption({ selected, onClick, icon: Icon, label, sublabel }: { selected: boolean; onClick: () => void; icon: typeof Truck; label: string; sublabel: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-foreground/30"}`}
-    >
+    <button type="button" onClick={onClick} className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-foreground/30"}`}>
       <div className={`w-4 h-4 rounded-full border-2 shrink-0 mt-0.5 ${selected ? "border-primary bg-primary" : "border-muted-foreground"}`} />
       <Icon className="w-4 h-4 text-muted-foreground" />
       <div>

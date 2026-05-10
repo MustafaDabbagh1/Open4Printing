@@ -12,6 +12,8 @@ router.get("/admin/dashboard/stats", async (_req, res): Promise<void> => {
     .select({
       totalOrders: sql<number>`count(*)::int`,
       newOrders: sql<number>`sum(case when ${ordersTable.orderStatus} = 'new' then 1 else 0 end)::int`,
+      awaitingArtworkReviewOrders: sql<number>`sum(case when ${ordersTable.orderStatus} = 'awaiting_artwork_review' then 1 else 0 end)::int`,
+      proofPendingOrders: sql<number>`sum(case when ${ordersTable.orderStatus} in ('proof_needed','proof_sent') then 1 else 0 end)::int`,
       pendingPaymentOrders: sql<number>`sum(case when ${ordersTable.paymentStatus} in ('pending_payment','pending_authorize_net_connection') then 1 else 0 end)::int`,
       paidOrders: sql<number>`sum(case when ${ordersTable.paymentStatus} in ('paid','test_paid') then 1 else 0 end)::int`,
       inProductionOrders: sql<number>`sum(case when ${ordersTable.orderStatus} = 'in_production' then 1 else 0 end)::int`,
@@ -42,6 +44,8 @@ router.get("/admin/dashboard/stats", async (_req, res): Promise<void> => {
     GetAdminDashboardStatsResponse.parse({
       totalOrders: Number(counts?.totalOrders ?? 0),
       newOrders: Number(counts?.newOrders ?? 0),
+      awaitingArtworkReviewOrders: Number(counts?.awaitingArtworkReviewOrders ?? 0),
+      proofPendingOrders: Number(counts?.proofPendingOrders ?? 0),
       pendingPaymentOrders: Number(counts?.pendingPaymentOrders ?? 0),
       paidOrders: Number(counts?.paidOrders ?? 0),
       inProductionOrders: Number(counts?.inProductionOrders ?? 0),

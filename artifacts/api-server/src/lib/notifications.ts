@@ -15,20 +15,36 @@ export interface OrderEmailContext {
 
 export async function sendOrderConfirmationEmail(ctx: OrderEmailContext): Promise<void> {
   logger.info({ ctx }, "[notifications] Order confirmation email (stub)");
-  // TODO: integrate with email provider
 }
 
 export async function sendNewOrderAdminNotification(ctx: OrderEmailContext): Promise<void> {
   logger.info({ ctx }, "[notifications] New order admin notification (stub)");
-  // TODO: integrate with email provider
 }
 
 export async function sendPaymentConfirmationEmail(ctx: OrderEmailContext): Promise<void> {
   logger.info({ ctx }, "[notifications] Payment confirmation email (stub)");
-  // TODO: integrate with email provider
 }
 
 export async function sendStatusUpdateEmail(ctx: OrderEmailContext & { status: string }): Promise<void> {
   logger.info({ ctx }, "[notifications] Status update email (stub)");
-  // TODO: integrate with email provider
+}
+
+export async function sendProofSentEmail(
+  ctx: OrderEmailContext & { proofFileName: string; comment: string },
+): Promise<void> {
+  logger.info({ ctx }, "[notifications] Proof sent to customer (stub)");
+}
+
+export async function sendReadyForPickupEmail(
+  ctx: OrderEmailContext & { pickupInstructions: string; estimatedReadyDate: string | null },
+): Promise<void> {
+  logger.info({ ctx }, "[notifications] Ready for pickup (stub)");
+}
+
+export async function sendQuoteReceivedEmail(ctx: {
+  email: string;
+  name: string;
+  quoteId: number;
+}): Promise<void> {
+  logger.info({ ctx }, "[notifications] Quote request received (stub)");
 }

@@ -27,6 +27,25 @@ export interface OrderItemOptions {
   [key: string]: string | number;
 }
 
+export interface ProductUploadConfig {
+  artworkRequired: boolean;
+  allowsBackUpload: boolean;
+  preferredFormats: string[];
+  notes: string;
+}
+
+export interface PublicProduct {
+  id: number;
+  slug: string;
+  name: string;
+  categorySlug: string;
+  shortDescription: string;
+  description: string;
+  startingPrice: number;
+  enabled: boolean;
+  uploadConfig: ProductUploadConfig;
+}
+
 export interface CreateOrderItem {
   productSlug: string;
   productName: string;
@@ -38,6 +57,14 @@ export interface CreateOrderItem {
   uploadedFileIds?: number[];
 }
 
+export type CreateOrderBodyDeliveryMethod =
+  (typeof CreateOrderBodyDeliveryMethod)[keyof typeof CreateOrderBodyDeliveryMethod];
+
+export const CreateOrderBodyDeliveryMethod = {
+  shipping: "shipping",
+  pickup: "pickup",
+} as const;
+
 export interface CreateOrderBody {
   email: string;
   firstName: string;
@@ -47,6 +74,11 @@ export interface CreateOrderBody {
   billingAddress: Address;
   shippingAddress: Address;
   notes?: string;
+  deliveryMethod?: CreateOrderBodyDeliveryMethod;
+  pickupInstructions?: string;
+  /** @nullable */
+  discountCode?: string | null;
+  discountAmount?: number;
   items: CreateOrderItem[];
   subtotal: number;
   tax?: number;
@@ -81,6 +113,7 @@ export interface UploadedFileInfo {
   fileSize: number;
   /** @nullable */
   side?: UploadedFileInfoSide;
+  isProof?: boolean;
   uploadedAt: string;
 }
 
@@ -116,12 +149,59 @@ export interface OrderDetail {
   billingAddress: Address;
   shippingAddress: Address;
   notes: string;
+  deliveryMethod: string;
+  pickupInstructions: string;
+  /** @nullable */
+  estimatedReadyDate?: string | null;
+  /** @nullable */
+  discountCode?: string | null;
+  discountAmount: number;
   subtotal: number;
   tax: number;
   shipping: number;
   total: number;
   paymentStatus: string;
   orderStatus: string;
+  proofStatus: string;
+  /** @nullable */
+  proofFileId?: number | null;
+  proofComment: string;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItemDetail[];
+  payments: PaymentInfo[];
+}
+
+export interface AdminOrderDetail {
+  id: number;
+  orderNumber: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  firstName: string;
+  lastName: string;
+  billingAddress: Address;
+  shippingAddress: Address;
+  notes: string;
+  internalNotes: string;
+  deliveryMethod: string;
+  pickupInstructions: string;
+  /** @nullable */
+  estimatedReadyDate?: string | null;
+  /** @nullable */
+  discountCode?: string | null;
+  discountAmount: number;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  paymentStatus: string;
+  orderStatus: string;
+  proofStatus: string;
+  /** @nullable */
+  proofFileId?: number | null;
+  proofComment: string;
+  proofFile?: UploadedFileInfo | null;
   createdAt: string;
   updatedAt: string;
   items: OrderItemDetail[];
@@ -146,6 +226,33 @@ export interface UpdateOrderBody {
   orderStatus?: string | null;
   /** @nullable */
   paymentStatus?: string | null;
+  /** @nullable */
+  proofStatus?: string | null;
+  /** @nullable */
+  internalNotes?: string | null;
+  /** @nullable */
+  pickupInstructions?: string | null;
+  /** @nullable */
+  estimatedReadyDate?: string | null;
+}
+
+export interface SetProofBody {
+  uploadedFileId: number;
+}
+
+export type ProofResponseBodyDecision =
+  (typeof ProofResponseBodyDecision)[keyof typeof ProofResponseBodyDecision];
+
+export const ProofResponseBodyDecision = {
+  approve: "approve",
+  request_changes: "request_changes",
+} as const;
+
+export interface ProofResponseBody {
+  email: string;
+  decision: ProofResponseBodyDecision;
+  /** @nullable */
+  comment?: string | null;
 }
 
 export interface AdminLoginBody {
@@ -162,6 +269,8 @@ export interface AdminMe {
 export interface AdminDashboardStats {
   totalOrders: number;
   newOrders: number;
+  awaitingArtworkReviewOrders: number;
+  proofPendingOrders: number;
   pendingPaymentOrders: number;
   paidOrders: number;
   inProductionOrders: number;
@@ -170,27 +279,185 @@ export interface AdminDashboardStats {
   recentOrders: OrderSummary[];
 }
 
+/**
+ * @nullable
+ */
+export type AdminProductOptions = { [key: string]: unknown } | null;
+
 export interface AdminProduct {
   id: number;
   slug: string;
   name: string;
   categorySlug: string;
   shortDescription: string;
+  description: string;
   startingPrice: number;
   enabled: boolean;
+  uploadConfig: ProductUploadConfig;
+  /** @nullable */
+  options?: AdminProductOptions;
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * @nullable
+ */
+export type CreateProductBodyOptions = { [key: string]: unknown } | null;
+
+export interface CreateProductBody {
+  slug: string;
+  name: string;
+  categorySlug: string;
+  shortDescription?: string;
+  description?: string;
+  startingPrice: number;
+  enabled?: boolean;
+  uploadConfig?: ProductUploadConfig | null;
+  /** @nullable */
+  options?: CreateProductBodyOptions;
+}
+
+/**
+ * @nullable
+ */
+export type UpdateProductBodyOptions = { [key: string]: unknown } | null;
 
 export interface UpdateProductBody {
   /** @nullable */
   name?: string | null;
   /** @nullable */
+  categorySlug?: string | null;
+  /** @nullable */
   shortDescription?: string | null;
+  /** @nullable */
+  description?: string | null;
   /** @nullable */
   startingPrice?: number | null;
   /** @nullable */
   enabled?: boolean | null;
+  uploadConfig?: ProductUploadConfig | null;
+  /** @nullable */
+  options?: UpdateProductBodyOptions;
+}
+
+export interface CreateQuoteBody {
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  productCategory: string;
+  /** @nullable */
+  productSlug?: string | null;
+  description: string;
+  /** @nullable */
+  requestedQuantity?: number | null;
+  notes?: string;
+  uploadedFileIds?: number[];
+}
+
+export interface QuoteRequest {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  productCategory: string;
+  /** @nullable */
+  productSlug?: string | null;
+  description: string;
+  /** @nullable */
+  requestedQuantity?: number | null;
+  notes: string;
+  status: string;
+  adminNotes: string;
+  /** @nullable */
+  quotedAmount?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuoteRequestDetail {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  productCategory: string;
+  /** @nullable */
+  productSlug?: string | null;
+  description: string;
+  /** @nullable */
+  requestedQuantity?: number | null;
+  notes: string;
+  status: string;
+  adminNotes: string;
+  /** @nullable */
+  quotedAmount?: string | null;
+  files: UploadedFileInfo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateQuoteBody {
+  /** @nullable */
+  status?: string | null;
+  /** @nullable */
+  adminNotes?: string | null;
+  /** @nullable */
+  quotedAmount?: string | null;
+}
+
+export interface ValidateCouponBody {
+  code: string;
+  subtotal: number;
+}
+
+export interface CouponInfo {
+  code: string;
+  description: string;
+  /** @nullable */
+  percentOff?: number | null;
+  /** @nullable */
+  amountOff?: number | null;
+  discountAmount: number;
+}
+
+export interface CustomerRegisterBody {
+  email: string;
+  /** @minLength 8 */
+  password: string;
+  firstName: string;
+  lastName: string;
+  /** @nullable */
+  phone?: string | null;
+}
+
+export interface CustomerLoginBody {
+  email: string;
+  password: string;
+}
+
+export interface CustomerMe {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  /** @nullable */
+  phone?: string | null;
+}
+
+export interface SavedAddress {
+  id: number;
+  label: string;
+  address: Address;
+  isDefault: boolean;
+}
+
+export interface CreateAddressBody {
+  label: string;
+  address: Address;
+  isDefault?: boolean;
 }
 
 export interface AuthorizeNetChargeBody {
@@ -214,4 +481,8 @@ export type ListAdminOrdersParams = {
   search?: string;
   orderStatus?: string;
   paymentStatus?: string;
+};
+
+export type ListAdminQuotesParams = {
+  status?: string;
 };

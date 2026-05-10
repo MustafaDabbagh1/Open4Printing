@@ -5,14 +5,23 @@
  * Open4Printing API
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductUploadConfig } from "./productUploadConfig";
+import type { UpdateProductBodyOptions } from "./updateProductBodyOptions";
 
 export interface UpdateProductBody {
   /** @nullable */
   name?: string | null;
   /** @nullable */
+  categorySlug?: string | null;
+  /** @nullable */
   shortDescription?: string | null;
+  /** @nullable */
+  description?: string | null;
   /** @nullable */
   startingPrice?: number | null;
   /** @nullable */
   enabled?: boolean | null;
+  uploadConfig?: ProductUploadConfig | null;
+  /** @nullable */
+  options?: UpdateProductBodyOptions;
 }

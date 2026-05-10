@@ -11,4 +11,12 @@ export interface UpdateOrderBody {
   orderStatus?: string | null;
   /** @nullable */
   paymentStatus?: string | null;
+  /** @nullable */
+  proofStatus?: string | null;
+  /** @nullable */
+  internalNotes?: string | null;
+  /** @nullable */
+  pickupInstructions?: string | null;
+  /** @nullable */
+  estimatedReadyDate?: Date | null;
 }

@@ -5,6 +5,8 @@
  * Open4Printing API
  * OpenAPI spec version: 0.1.0
  */
+import type { AdminProductOptions } from "./adminProductOptions";
+import type { ProductUploadConfig } from "./productUploadConfig";
 
 export interface AdminProduct {
   id: number;
@@ -12,8 +14,12 @@ export interface AdminProduct {
   name: string;
   categorySlug: string;
   shortDescription: string;
+  description: string;
   startingPrice: number;
   enabled: boolean;
+  uploadConfig: ProductUploadConfig;
+  /** @nullable */
+  options?: AdminProductOptions;
   createdAt: Date;
   updatedAt: Date;
 }

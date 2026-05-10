@@ -13,6 +13,9 @@ tags:
   - name: admin
   - name: payments
   - name: products
+  - name: quotes
+  - name: coupons
+  - name: customers
 paths:
   /healthz:
     get:
@@ -26,6 +29,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products/{slug}:
+    get:
+      operationId: getPublicProduct
+      tags: [products]
+      summary: Public product detail (used to load upload rules)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicProduct"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /orders:
     post:
@@ -72,6 +99,229 @@ paths:
                 $ref: "#/components/schemas/OrderDetail"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/{orderNumber}/proof-response:
+    post:
+      operationId: respondToProof
+      tags: [orders]
+      summary: Customer approves or requests changes on a proof (verified by email)
+      parameters:
+        - name: orderNumber
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProofResponseBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /quotes:
+    post:
+      operationId: createQuoteRequest
+      tags: [quotes]
+      summary: Submit a quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuoteBody"
+      responses:
+        "201":
+          description: Quote request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequest"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /coupons/validate:
+    post:
+      operationId: validateCoupon
+      tags: [coupons]
+      summary: Validate a coupon/promo code at checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateCouponBody"
+      responses:
+        "200":
+          description: Coupon details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CouponInfo"
+        "404":
+          description: Invalid coupon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/register:
+    post:
+      operationId: customerRegister
+      tags: [customers]
+      summary: Create a customer account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerRegisterBody"
+      responses:
+        "200":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerMe"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/login:
+    post:
+      operationId: customerLogin
+      tags: [customers]
+      summary: Customer login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerLoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerMe"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/logout:
+    post:
+      operationId: customerLogout
+      tags: [customers]
+      summary: Customer logout
+      responses:
+        "204":
+          description: Logged out
+
+  /customer/me:
+    get:
+      operationId: customerMe
+      tags: [customers]
+      summary: Current customer session
+      responses:
+        "200":
+          description: Current customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerMe"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/orders:
+    get:
+      operationId: listCustomerOrders
+      tags: [customers]
+      summary: Past orders for the signed-in customer
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrderSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/addresses:
+    get:
+      operationId: listCustomerAddresses
+      tags: [customers]
+      summary: Saved addresses for the signed-in customer
+      responses:
+        "200":
+          description: Addresses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavedAddress"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createCustomerAddress
+      tags: [customers]
+      summary: Save a new address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAddressBody"
+      responses:
+        "201":
+          description: Address saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedAddress"
+        "401":
+          description: Not authenticated
           content:
             application/json:
               schema:
@@ -187,7 +437,7 @@ paths:
     get:
       operationId: getAdminOrder
       tags: [admin]
-      summary: Get a single order with items, files, and payments
+      summary: Get a single order with items, files, payments, internal notes, and proof
       parameters:
         - name: id
           in: path
@@ -199,7 +449,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderDetail"
+                $ref: "#/components/schemas/AdminOrderDetail"
         "404":
           description: Not found
           content:
@@ -209,7 +459,7 @@ paths:
     patch:
       operationId: updateAdminOrder
       tags: [admin]
-      summary: Update order or payment status (admin only)
+      summary: Update order, payment, proof status, internal notes, or estimated ready date
       parameters:
         - name: id
           in: path
@@ -227,7 +477,61 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderDetail"
+                $ref: "#/components/schemas/AdminOrderDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/orders/{id}/duplicate:
+    post:
+      operationId: duplicateAdminOrder
+      tags: [admin]
+      summary: Reorder — clone an order's items into a new draft order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "201":
+          description: Duplicated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderConfirmation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/orders/{id}/proof:
+    post:
+      operationId: setAdminOrderProof
+      tags: [admin]
+      summary: Attach a proof file to an order and mark proof as sent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetProofBody"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderDetail"
         "404":
           description: Not found
           content:
@@ -251,6 +555,29 @@ paths:
                   $ref: "#/components/schemas/AdminProduct"
         "401":
           description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createAdminProduct
+      tags: [admin]
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminProduct"
+        "400":
+          description: Validation error
           content:
             application/json:
               schema:
@@ -279,6 +606,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AdminProduct"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteAdminProduct
+      tags: [admin]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/quotes:
+    get:
+      operationId: listAdminQuotes
+      tags: [admin]
+      summary: List quote requests
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Quote requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuoteRequest"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/quotes/{id}:
+    get:
+      operationId: getAdminQuote
+      tags: [admin]
+      summary: Get a single quote request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Quote request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequestDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAdminQuote
+      tags: [admin]
+      summary: Update quote status, admin notes, quoted amount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQuoteBody"
+      responses:
+        "200":
+          description: Updated quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequestDetail"
         "404":
           description: Not found
           content:
@@ -343,6 +766,31 @@ components:
           - { type: string }
           - { type: number }
 
+    ProductUploadConfig:
+      type: object
+      properties:
+        artworkRequired: { type: boolean }
+        allowsBackUpload: { type: boolean }
+        preferredFormats:
+          type: array
+          items: { type: string }
+        notes: { type: string }
+      required: [artworkRequired, allowsBackUpload, preferredFormats, notes]
+
+    PublicProduct:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        categorySlug: { type: string }
+        shortDescription: { type: string }
+        description: { type: string }
+        startingPrice: { type: number }
+        enabled: { type: boolean }
+        uploadConfig: { $ref: "#/components/schemas/ProductUploadConfig" }
+      required: [id, slug, name, categorySlug, shortDescription, description, startingPrice, enabled, uploadConfig]
+
     CreateOrderItem:
       type: object
       properties:
@@ -368,6 +816,12 @@ components:
         billingAddress: { $ref: "#/components/schemas/Address" }
         shippingAddress: { $ref: "#/components/schemas/Address" }
         notes: { type: string }
+        deliveryMethod:
+          type: string
+          enum: [shipping, pickup]
+        pickupInstructions: { type: string }
+        discountCode: { type: ["string", "null"] }
+        discountAmount: { type: number }
         items:
           type: array
           items: { $ref: "#/components/schemas/CreateOrderItem" }
@@ -412,6 +866,7 @@ components:
         side:
           type: ["string", "null"]
           enum: [front, back, null]
+        isProof: { type: boolean }
         uploadedAt: { type: string, format: date-time }
       required: [id, originalName, fileType, fileSize, uploadedAt]
 
@@ -438,12 +893,20 @@ components:
         billingAddress: { $ref: "#/components/schemas/Address" }
         shippingAddress: { $ref: "#/components/schemas/Address" }
         notes: { type: string }
+        deliveryMethod: { type: string }
+        pickupInstructions: { type: string }
+        estimatedReadyDate: { type: ["string", "null"], format: date-time }
+        discountCode: { type: ["string", "null"] }
+        discountAmount: { type: number }
         subtotal: { type: number }
         tax: { type: number }
         shipping: { type: number }
         total: { type: number }
         paymentStatus: { type: string }
         orderStatus: { type: string }
+        proofStatus: { type: string }
+        proofFileId: { type: ["integer", "null"] }
+        proofComment: { type: string }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
         items:
@@ -452,7 +915,95 @@ components:
         payments:
           type: array
           items: { $ref: "#/components/schemas/PaymentInfo" }
-      required: [id, orderNumber, email, firstName, lastName, billingAddress, shippingAddress, notes, subtotal, tax, shipping, total, paymentStatus, orderStatus, createdAt, updatedAt, items, payments]
+      required:
+        - id
+        - orderNumber
+        - email
+        - firstName
+        - lastName
+        - billingAddress
+        - shippingAddress
+        - notes
+        - deliveryMethod
+        - pickupInstructions
+        - discountAmount
+        - subtotal
+        - tax
+        - shipping
+        - total
+        - paymentStatus
+        - orderStatus
+        - proofStatus
+        - proofComment
+        - createdAt
+        - updatedAt
+        - items
+        - payments
+
+    AdminOrderDetail:
+      type: object
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        firstName: { type: string }
+        lastName: { type: string }
+        billingAddress: { $ref: "#/components/schemas/Address" }
+        shippingAddress: { $ref: "#/components/schemas/Address" }
+        notes: { type: string }
+        internalNotes: { type: string }
+        deliveryMethod: { type: string }
+        pickupInstructions: { type: string }
+        estimatedReadyDate: { type: ["string", "null"], format: date-time }
+        discountCode: { type: ["string", "null"] }
+        discountAmount: { type: number }
+        subtotal: { type: number }
+        tax: { type: number }
+        shipping: { type: number }
+        total: { type: number }
+        paymentStatus: { type: string }
+        orderStatus: { type: string }
+        proofStatus: { type: string }
+        proofFileId: { type: ["integer", "null"] }
+        proofComment: { type: string }
+        proofFile:
+          oneOf:
+            - { $ref: "#/components/schemas/UploadedFileInfo" }
+            - { type: "null" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItemDetail" }
+        payments:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentInfo" }
+      required:
+        - id
+        - orderNumber
+        - email
+        - firstName
+        - lastName
+        - billingAddress
+        - shippingAddress
+        - notes
+        - internalNotes
+        - deliveryMethod
+        - pickupInstructions
+        - discountAmount
+        - subtotal
+        - tax
+        - shipping
+        - total
+        - paymentStatus
+        - orderStatus
+        - proofStatus
+        - proofComment
+        - createdAt
+        - updatedAt
+        - items
+        - payments
 
     OrderSummary:
       type: object
@@ -474,6 +1025,26 @@ components:
       properties:
         orderStatus: { type: ["string", "null"] }
         paymentStatus: { type: ["string", "null"] }
+        proofStatus: { type: ["string", "null"] }
+        internalNotes: { type: ["string", "null"] }
+        pickupInstructions: { type: ["string", "null"] }
+        estimatedReadyDate: { type: ["string", "null"], format: date-time }
+
+    SetProofBody:
+      type: object
+      properties:
+        uploadedFileId: { type: integer }
+      required: [uploadedFileId]
+
+    ProofResponseBody:
+      type: object
+      properties:
+        email: { type: string }
+        decision:
+          type: string
+          enum: [approve, request_changes]
+        comment: { type: ["string", "null"] }
+      required: [email, decision]
 
     AdminLoginBody:
       type: object
@@ -495,6 +1066,8 @@ components:
       properties:
         totalOrders: { type: integer }
         newOrders: { type: integer }
+        awaitingArtworkReviewOrders: { type: integer }
+        proofPendingOrders: { type: integer }
         pendingPaymentOrders: { type: integer }
         paidOrders: { type: integer }
         inProductionOrders: { type: integer }
@@ -503,7 +1076,17 @@ components:
         recentOrders:
           type: array
           items: { $ref: "#/components/schemas/OrderSummary" }
-      required: [totalOrders, newOrders, pendingPaymentOrders, paidOrders, inProductionOrders, completedOrders, totalRevenue, recentOrders]
+      required:
+        - totalOrders
+        - newOrders
+        - awaitingArtworkReviewOrders
+        - proofPendingOrders
+        - pendingPaymentOrders
+        - paidOrders
+        - inProductionOrders
+        - completedOrders
+        - totalRevenue
+        - recentOrders
 
     AdminProduct:
       type: object
@@ -513,19 +1096,177 @@ components:
         name: { type: string }
         categorySlug: { type: string }
         shortDescription: { type: string }
+        description: { type: string }
         startingPrice: { type: number }
         enabled: { type: boolean }
+        uploadConfig: { $ref: "#/components/schemas/ProductUploadConfig" }
+        options:
+          type: ["object", "null"]
+          additionalProperties: true
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
-      required: [id, slug, name, categorySlug, shortDescription, startingPrice, enabled, createdAt, updatedAt]
+      required: [id, slug, name, categorySlug, shortDescription, description, startingPrice, enabled, uploadConfig, createdAt, updatedAt]
+
+    CreateProductBody:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+        categorySlug: { type: string }
+        shortDescription: { type: string }
+        description: { type: string }
+        startingPrice: { type: number }
+        enabled: { type: boolean }
+        uploadConfig:
+          oneOf:
+            - { $ref: "#/components/schemas/ProductUploadConfig" }
+            - { type: "null" }
+        options:
+          type: ["object", "null"]
+          additionalProperties: true
+      required: [slug, name, categorySlug, startingPrice]
 
     UpdateProductBody:
       type: object
       properties:
         name: { type: ["string", "null"] }
+        categorySlug: { type: ["string", "null"] }
         shortDescription: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
         startingPrice: { type: ["number", "null"] }
         enabled: { type: ["boolean", "null"] }
+        uploadConfig:
+          oneOf:
+            - { $ref: "#/components/schemas/ProductUploadConfig" }
+            - { type: "null" }
+        options:
+          type: ["object", "null"]
+          additionalProperties: true
+
+    CreateQuoteBody:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        productCategory: { type: string }
+        productSlug: { type: ["string", "null"] }
+        description: { type: string }
+        requestedQuantity: { type: ["integer", "null"] }
+        notes: { type: string }
+        uploadedFileIds:
+          type: array
+          items: { type: integer }
+      required: [name, email, productCategory, description]
+
+    QuoteRequest:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        productCategory: { type: string }
+        productSlug: { type: ["string", "null"] }
+        description: { type: string }
+        requestedQuantity: { type: ["integer", "null"] }
+        notes: { type: string }
+        status: { type: string }
+        adminNotes: { type: string }
+        quotedAmount: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, email, productCategory, description, notes, status, adminNotes, createdAt, updatedAt]
+
+    QuoteRequestDetail:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        productCategory: { type: string }
+        productSlug: { type: ["string", "null"] }
+        description: { type: string }
+        requestedQuantity: { type: ["integer", "null"] }
+        notes: { type: string }
+        status: { type: string }
+        adminNotes: { type: string }
+        quotedAmount: { type: ["string", "null"] }
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/UploadedFileInfo" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, email, productCategory, description, notes, status, adminNotes, files, createdAt, updatedAt]
+
+    UpdateQuoteBody:
+      type: object
+      properties:
+        status: { type: ["string", "null"] }
+        adminNotes: { type: ["string", "null"] }
+        quotedAmount: { type: ["string", "null"] }
+
+    ValidateCouponBody:
+      type: object
+      properties:
+        code: { type: string }
+        subtotal: { type: number }
+      required: [code, subtotal]
+
+    CouponInfo:
+      type: object
+      properties:
+        code: { type: string }
+        description: { type: string }
+        percentOff: { type: ["integer", "null"] }
+        amountOff: { type: ["number", "null"] }
+        discountAmount: { type: number }
+      required: [code, description, discountAmount]
+
+    CustomerRegisterBody:
+      type: object
+      properties:
+        email: { type: string }
+        password: { type: string, minLength: 8 }
+        firstName: { type: string }
+        lastName: { type: string }
+        phone: { type: ["string", "null"] }
+      required: [email, password, firstName, lastName]
+
+    CustomerLoginBody:
+      type: object
+      properties:
+        email: { type: string }
+        password: { type: string }
+      required: [email, password]
+
+    CustomerMe:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        phone: { type: ["string", "null"] }
+      required: [id, email, firstName, lastName]
+
+    SavedAddress:
+      type: object
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        isDefault: { type: boolean }
+      required: [id, label, address, isDefault]
+
+    CreateAddressBody:
+      type: object
+      properties:
+        label: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        isDefault: { type: boolean }
+      required: [label, address]
 
     AuthorizeNetChargeBody:
       type: object

@@ -1,0 +1,171 @@
+Keep the current Open4Printing design as-is. Do not redesign the website.
+
+Now improve the website functionality beyond the basic checkout and upload flow.
+
+Focus on making the site work more like a real online printing store.
+
+Add or improve these features:
+
+1. Dynamic product pricing
+Product prices should update based on selected options:
+- quantity
+- size
+- material/paper
+- finish
+- single-sided or double-sided
+- turnaround time
+- special options
+
+The customer should see the price update before adding to cart.
+
+2. Product-specific upload requirements
+Each product should have its own upload rules.
+
+Examples:
+- Business cards: front upload required, back upload optional
+- Banners: one artwork file required
+- Yard signs: artwork required, single-sided/double-sided option
+- Brochures: PDF upload preferred
+- Stickers: artwork upload plus cutline/special notes
+
+3. Basic artwork validation
+When a customer uploads artwork, show basic checks:
+- accepted file type
+- file size
+- image dimensions when available
+- low-resolution warning if image appears too small
+- missing required artwork warning
+- unsupported file type warning
+
+Do not block everything too aggressively, but warn the customer clearly.
+
+4. Quote request flow
+Add a “Request a Quote” option for custom products or special jobs.
+
+Quote requests should save to the backend/admin dashboard with:
+- customer name
+- email
+- phone
+- product/category
+- description
+- uploaded files if any
+- requested quantity
+- notes
+- date submitted
+- quote status
+
+Quote statuses:
+- new
+- reviewing
+- quoted
+- accepted
+- declined
+- closed
+
+5. Admin product management
+Improve /admin/products so admin can:
+- add products
+- edit products
+- disable products
+- update descriptions
+- update pricing
+- update available options
+- mark whether artwork upload is required
+- choose product category
+
+6. Customer account structure
+Prepare a customer account area where customers can eventually:
+- sign in
+- view past orders
+- reorder
+- save addresses
+- view order status
+
+It can be basic for now, but structure the backend cleanly.
+
+7. Reorder functionality
+Add a reorder button in the customer/order structure and admin order detail.
+
+The goal is to eventually let customers reorder a previous print job using the same artwork and options.
+
+8. Order production workflow
+Improve admin order statuses:
+- new
+- awaiting_artwork_review
+- proof_needed
+- proof_sent
+- proof_approved
+- in_production
+- ready_for_pickup
+- shipped
+- completed
+- cancelled
+
+Admin should be able to update order status from the order detail page.
+
+9. Admin notes
+Add internal admin notes to each order.
+
+These notes should not be visible to customers.
+
+10. Proof approval structure
+Prepare a proof approval flow:
+- admin can upload a proof file/image
+- order status can be set to proof_sent
+- customer can eventually approve or request changes
+- status can change to proof_approved
+
+This can be basic for now, but build the structure.
+
+11. Email notification placeholders
+Add backend functions/placeholders for:
+- order confirmation email
+- new order admin notification
+- payment confirmation
+- proof sent email
+- order status update email
+- ready for pickup email
+
+Do not require real email API credentials yet. Use environment variables/placeholders.
+
+12. Shipping and pickup logic
+Checkout should support:
+- local pickup
+- shipping
+- delivery method saved to order
+- shipping cost placeholder
+- pickup instructions
+- estimated turnaround date
+
+13. Tax and discount structure
+Add structure for:
+- sales tax calculation
+- coupon/promo code
+- discount amount
+- subtotal
+- tax
+- shipping
+- final total
+
+14. Stronger checkout validation
+Checkout should prevent submitting if:
+- cart is empty
+- required contact info is missing
+- required address is missing
+- required artwork is missing
+- required product options are missing
+- payment fields are incomplete in demo mode
+
+15. Admin reporting basics
+Add dashboard stats for:
+- total orders
+- new orders
+- orders needing artwork review
+- proof pending orders
+- in production orders
+- completed orders
+- total revenue placeholder
+- most recent orders
+
+Important:
+Do not change the current design style. Only improve the functionality, backend structure, checkout logic, upload system, admin dashboard, and order workflow.

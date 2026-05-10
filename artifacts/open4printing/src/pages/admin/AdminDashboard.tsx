@@ -1,11 +1,14 @@
 import { Link } from "wouter";
 import { useGetAdminDashboardStats } from "@workspace/api-client-react";
 import { AdminLayout } from "./AdminLayout";
-import { ShoppingBag, DollarSign, Clock, CheckCircle2, Package, AlertCircle } from "lucide-react";
+import { ShoppingBag, DollarSign, Clock, CheckCircle2, Package, AlertCircle, FileSearch, Eye, MessageSquare } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
   awaiting_artwork_review: "Awaiting artwork review",
+  proof_needed: "Proof needed",
+  proof_sent: "Proof sent",
+  proof_approved: "Proof approved",
   in_production: "In production",
   ready_for_pickup: "Ready for pickup",
   shipped: "Shipped",
@@ -38,6 +41,8 @@ function Inner() {
     { label: "Total orders", value: data.totalOrders, icon: ShoppingBag },
     { label: "Revenue (paid)", value: `$${data.totalRevenue.toFixed(2)}`, icon: DollarSign },
     { label: "New", value: data.newOrders, icon: AlertCircle },
+    { label: "Awaiting artwork review", value: data.awaitingArtworkReviewOrders, icon: FileSearch },
+    { label: "Proof pending", value: data.proofPendingOrders, icon: Eye },
     { label: "Pending payment", value: data.pendingPaymentOrders, icon: Clock },
     { label: "Paid", value: data.paidOrders, icon: CheckCircle2 },
     { label: "In production", value: data.inProductionOrders, icon: Package },
@@ -45,8 +50,11 @@ function Inner() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-serif font-black">Dashboard</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-3xl font-serif font-black">Dashboard</h1>
+        <Link href="/admin/quotes" className="text-sm text-primary hover:underline inline-flex items-center gap-1"><MessageSquare className="w-4 h-4" /> Quote requests</Link>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => (
           <div key={s.label} className="bg-card rounded-2xl border border-border p-5">
             <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
@@ -89,11 +97,11 @@ function Inner() {
 export function StatusPill({ status, kind }: { status: string; kind: "order" | "payment" }) {
   const label = kind === "order" ? STATUS_LABELS[status] ?? status : PAYMENT_LABELS[status] ?? status;
   const color =
-    status === "paid" || status === "test_paid" || status === "completed" || status === "shipped"
+    status === "paid" || status === "test_paid" || status === "completed" || status === "shipped" || status === "proof_approved"
       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
       : status === "failed" || status === "cancelled"
         ? "bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-300"
-        : status === "pending_payment" || status === "pending_authorize_net_connection" || status === "new" || status === "awaiting_artwork_review"
+        : status === "pending_payment" || status === "pending_authorize_net_connection" || status === "new" || status === "awaiting_artwork_review" || status === "proof_needed" || status === "proof_sent"
           ? "bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
           : "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-300";
   return <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${color}`}>{label}</span>;

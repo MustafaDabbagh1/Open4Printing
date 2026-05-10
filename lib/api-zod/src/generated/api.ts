@@ -15,6 +15,30 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * @summary Public product detail (used to load upload rules)
+ */
+export const GetPublicProductParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+export const GetPublicProductResponse = zod.object({
+  id: zod.number(),
+  slug: zod.string(),
+  name: zod.string(),
+  categorySlug: zod.string(),
+  shortDescription: zod.string(),
+  description: zod.string(),
+  startingPrice: zod.number(),
+  enabled: zod.boolean(),
+  uploadConfig: zod.object({
+    artworkRequired: zod.boolean(),
+    allowsBackUpload: zod.boolean(),
+    preferredFormats: zod.array(zod.string()),
+    notes: zod.string(),
+  }),
+});
+
+/**
  * @summary Submit a new order from checkout
  */
 
@@ -40,6 +64,10 @@ export const CreateOrderBody = zod.object({
     country: zod.string(),
   }),
   notes: zod.string().optional(),
+  deliveryMethod: zod.enum(["shipping", "pickup"]).optional(),
+  pickupInstructions: zod.string().optional(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number().optional(),
   items: zod.array(
     zod.object({
       productSlug: zod.string(),
@@ -90,12 +118,20 @@ export const GetOrderByNumberResponse = zod.object({
     country: zod.string(),
   }),
   notes: zod.string(),
+  deliveryMethod: zod.string(),
+  pickupInstructions: zod.string(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number(),
   subtotal: zod.number(),
   tax: zod.number(),
   shipping: zod.number(),
   total: zod.number(),
   paymentStatus: zod.string(),
   orderStatus: zod.string(),
+  proofStatus: zod.string(),
+  proofFileId: zod.number().nullish(),
+  proofComment: zod.string(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
   items: zod.array(
@@ -123,6 +159,7 @@ export const GetOrderByNumberResponse = zod.object({
               zod.literal(null),
             ])
             .nullish(),
+          isProof: zod.boolean().optional(),
           uploadedAt: zod.coerce.date(),
         }),
       ),
@@ -138,6 +175,236 @@ export const GetOrderByNumberResponse = zod.object({
       createdAt: zod.coerce.date(),
     }),
   ),
+});
+
+/**
+ * @summary Customer approves or requests changes on a proof (verified by email)
+ */
+export const RespondToProofParams = zod.object({
+  orderNumber: zod.coerce.string(),
+});
+
+export const RespondToProofBody = zod.object({
+  email: zod.string(),
+  decision: zod.enum(["approve", "request_changes"]),
+  comment: zod.string().nullish(),
+});
+
+export const RespondToProofResponse = zod.object({
+  id: zod.number(),
+  orderNumber: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  billingAddress: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  shippingAddress: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  notes: zod.string(),
+  deliveryMethod: zod.string(),
+  pickupInstructions: zod.string(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number(),
+  subtotal: zod.number(),
+  tax: zod.number(),
+  shipping: zod.number(),
+  total: zod.number(),
+  paymentStatus: zod.string(),
+  orderStatus: zod.string(),
+  proofStatus: zod.string(),
+  proofFileId: zod.number().nullish(),
+  proofComment: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      productSlug: zod.string(),
+      productName: zod.string(),
+      options: zod.record(
+        zod.string(),
+        zod.union([zod.string(), zod.number()]),
+      ),
+      quantity: zod.number(),
+      unitPrice: zod.number(),
+      lineTotal: zod.number(),
+      files: zod.array(
+        zod.object({
+          id: zod.number(),
+          originalName: zod.string(),
+          fileType: zod.string(),
+          fileSize: zod.number(),
+          side: zod
+            .union([
+              zod.literal("front"),
+              zod.literal("back"),
+              zod.literal(null),
+            ])
+            .nullish(),
+          isProof: zod.boolean().optional(),
+          uploadedAt: zod.coerce.date(),
+        }),
+      ),
+    }),
+  ),
+  payments: zod.array(
+    zod.object({
+      id: zod.number(),
+      provider: zod.string(),
+      providerTransactionId: zod.string().nullish(),
+      amount: zod.number(),
+      status: zod.string(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Submit a quote request
+ */
+export const CreateQuoteRequestBody = zod.object({
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  productCategory: zod.string(),
+  productSlug: zod.string().nullish(),
+  description: zod.string(),
+  requestedQuantity: zod.number().nullish(),
+  notes: zod.string().optional(),
+  uploadedFileIds: zod.array(zod.number()).optional(),
+});
+
+/**
+ * @summary Validate a coupon/promo code at checkout
+ */
+export const ValidateCouponBody = zod.object({
+  code: zod.string(),
+  subtotal: zod.number(),
+});
+
+export const ValidateCouponResponse = zod.object({
+  code: zod.string(),
+  description: zod.string(),
+  percentOff: zod.number().nullish(),
+  amountOff: zod.number().nullish(),
+  discountAmount: zod.number(),
+});
+
+/**
+ * @summary Create a customer account
+ */
+export const customerRegisterBodyPasswordMin = 8;
+
+export const CustomerRegisterBody = zod.object({
+  email: zod.string(),
+  password: zod.string().min(customerRegisterBodyPasswordMin),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  phone: zod.string().nullish(),
+});
+
+export const CustomerRegisterResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  phone: zod.string().nullish(),
+});
+
+/**
+ * @summary Customer login
+ */
+export const CustomerLoginBody = zod.object({
+  email: zod.string(),
+  password: zod.string(),
+});
+
+export const CustomerLoginResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  phone: zod.string().nullish(),
+});
+
+/**
+ * @summary Current customer session
+ */
+export const CustomerMeResponse = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  phone: zod.string().nullish(),
+});
+
+/**
+ * @summary Past orders for the signed-in customer
+ */
+export const ListCustomerOrdersResponseItem = zod.object({
+  id: zod.number(),
+  orderNumber: zod.string(),
+  email: zod.string(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  total: zod.number(),
+  paymentStatus: zod.string(),
+  orderStatus: zod.string(),
+  itemCount: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const ListCustomerOrdersResponse = zod.array(
+  ListCustomerOrdersResponseItem,
+);
+
+/**
+ * @summary Saved addresses for the signed-in customer
+ */
+export const ListCustomerAddressesResponseItem = zod.object({
+  id: zod.number(),
+  label: zod.string(),
+  address: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  isDefault: zod.boolean(),
+});
+export const ListCustomerAddressesResponse = zod.array(
+  ListCustomerAddressesResponseItem,
+);
+
+/**
+ * @summary Save a new address
+ */
+export const CreateCustomerAddressBody = zod.object({
+  label: zod.string(),
+  address: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  isDefault: zod.boolean().optional(),
 });
 
 /**
@@ -169,6 +436,8 @@ export const AdminMeResponse = zod.object({
 export const GetAdminDashboardStatsResponse = zod.object({
   totalOrders: zod.number(),
   newOrders: zod.number(),
+  awaitingArtworkReviewOrders: zod.number(),
+  proofPendingOrders: zod.number(),
   pendingPaymentOrders: zod.number(),
   paidOrders: zod.number(),
   inProductionOrders: zod.number(),
@@ -214,7 +483,7 @@ export const ListAdminOrdersResponseItem = zod.object({
 export const ListAdminOrdersResponse = zod.array(ListAdminOrdersResponseItem);
 
 /**
- * @summary Get a single order with items, files, and payments
+ * @summary Get a single order with items, files, payments, internal notes, and proof
  */
 export const GetAdminOrderParams = zod.object({
   id: zod.coerce.number(),
@@ -244,12 +513,37 @@ export const GetAdminOrderResponse = zod.object({
     country: zod.string(),
   }),
   notes: zod.string(),
+  internalNotes: zod.string(),
+  deliveryMethod: zod.string(),
+  pickupInstructions: zod.string(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number(),
   subtotal: zod.number(),
   tax: zod.number(),
   shipping: zod.number(),
   total: zod.number(),
   paymentStatus: zod.string(),
   orderStatus: zod.string(),
+  proofStatus: zod.string(),
+  proofFileId: zod.number().nullish(),
+  proofComment: zod.string(),
+  proofFile: zod
+    .union([
+      zod.object({
+        id: zod.number(),
+        originalName: zod.string(),
+        fileType: zod.string(),
+        fileSize: zod.number(),
+        side: zod
+          .union([zod.literal("front"), zod.literal("back"), zod.literal(null)])
+          .nullish(),
+        isProof: zod.boolean().optional(),
+        uploadedAt: zod.coerce.date(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
   items: zod.array(
@@ -277,6 +571,7 @@ export const GetAdminOrderResponse = zod.object({
               zod.literal(null),
             ])
             .nullish(),
+          isProof: zod.boolean().optional(),
           uploadedAt: zod.coerce.date(),
         }),
       ),
@@ -295,7 +590,7 @@ export const GetAdminOrderResponse = zod.object({
 });
 
 /**
- * @summary Update order or payment status (admin only)
+ * @summary Update order, payment, proof status, internal notes, or estimated ready date
  */
 export const UpdateAdminOrderParams = zod.object({
   id: zod.coerce.number(),
@@ -304,6 +599,10 @@ export const UpdateAdminOrderParams = zod.object({
 export const UpdateAdminOrderBody = zod.object({
   orderStatus: zod.string().nullish(),
   paymentStatus: zod.string().nullish(),
+  proofStatus: zod.string().nullish(),
+  internalNotes: zod.string().nullish(),
+  pickupInstructions: zod.string().nullish(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
 });
 
 export const UpdateAdminOrderResponse = zod.object({
@@ -330,12 +629,37 @@ export const UpdateAdminOrderResponse = zod.object({
     country: zod.string(),
   }),
   notes: zod.string(),
+  internalNotes: zod.string(),
+  deliveryMethod: zod.string(),
+  pickupInstructions: zod.string(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number(),
   subtotal: zod.number(),
   tax: zod.number(),
   shipping: zod.number(),
   total: zod.number(),
   paymentStatus: zod.string(),
   orderStatus: zod.string(),
+  proofStatus: zod.string(),
+  proofFileId: zod.number().nullish(),
+  proofComment: zod.string(),
+  proofFile: zod
+    .union([
+      zod.object({
+        id: zod.number(),
+        originalName: zod.string(),
+        fileType: zod.string(),
+        fileSize: zod.number(),
+        side: zod
+          .union([zod.literal("front"), zod.literal("back"), zod.literal(null)])
+          .nullish(),
+        isProof: zod.boolean().optional(),
+        uploadedAt: zod.coerce.date(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
   items: zod.array(
@@ -363,6 +687,125 @@ export const UpdateAdminOrderResponse = zod.object({
               zod.literal(null),
             ])
             .nullish(),
+          isProof: zod.boolean().optional(),
+          uploadedAt: zod.coerce.date(),
+        }),
+      ),
+    }),
+  ),
+  payments: zod.array(
+    zod.object({
+      id: zod.number(),
+      provider: zod.string(),
+      providerTransactionId: zod.string().nullish(),
+      amount: zod.number(),
+      status: zod.string(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Reorder — clone an order's items into a new draft order
+ */
+export const DuplicateAdminOrderParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Attach a proof file to an order and mark proof as sent
+ */
+export const SetAdminOrderProofParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const SetAdminOrderProofBody = zod.object({
+  uploadedFileId: zod.number(),
+});
+
+export const SetAdminOrderProofResponse = zod.object({
+  id: zod.number(),
+  orderNumber: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  firstName: zod.string(),
+  lastName: zod.string(),
+  billingAddress: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  shippingAddress: zod.object({
+    line1: zod.string(),
+    line2: zod.string().nullish(),
+    city: zod.string(),
+    state: zod.string(),
+    postalCode: zod.string(),
+    country: zod.string(),
+  }),
+  notes: zod.string(),
+  internalNotes: zod.string(),
+  deliveryMethod: zod.string(),
+  pickupInstructions: zod.string(),
+  estimatedReadyDate: zod.coerce.date().nullish(),
+  discountCode: zod.string().nullish(),
+  discountAmount: zod.number(),
+  subtotal: zod.number(),
+  tax: zod.number(),
+  shipping: zod.number(),
+  total: zod.number(),
+  paymentStatus: zod.string(),
+  orderStatus: zod.string(),
+  proofStatus: zod.string(),
+  proofFileId: zod.number().nullish(),
+  proofComment: zod.string(),
+  proofFile: zod
+    .union([
+      zod.object({
+        id: zod.number(),
+        originalName: zod.string(),
+        fileType: zod.string(),
+        fileSize: zod.number(),
+        side: zod
+          .union([zod.literal("front"), zod.literal("back"), zod.literal(null)])
+          .nullish(),
+        isProof: zod.boolean().optional(),
+        uploadedAt: zod.coerce.date(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      productSlug: zod.string(),
+      productName: zod.string(),
+      options: zod.record(
+        zod.string(),
+        zod.union([zod.string(), zod.number()]),
+      ),
+      quantity: zod.number(),
+      unitPrice: zod.number(),
+      lineTotal: zod.number(),
+      files: zod.array(
+        zod.object({
+          id: zod.number(),
+          originalName: zod.string(),
+          fileType: zod.string(),
+          fileSize: zod.number(),
+          side: zod
+            .union([
+              zod.literal("front"),
+              zod.literal("back"),
+              zod.literal(null),
+            ])
+            .nullish(),
+          isProof: zod.boolean().optional(),
           uploadedAt: zod.coerce.date(),
         }),
       ),
@@ -389,14 +832,47 @@ export const ListAdminProductsResponseItem = zod.object({
   name: zod.string(),
   categorySlug: zod.string(),
   shortDescription: zod.string(),
+  description: zod.string(),
   startingPrice: zod.number(),
   enabled: zod.boolean(),
+  uploadConfig: zod.object({
+    artworkRequired: zod.boolean(),
+    allowsBackUpload: zod.boolean(),
+    preferredFormats: zod.array(zod.string()),
+    notes: zod.string(),
+  }),
+  options: zod.record(zod.string(), zod.unknown()).nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
 export const ListAdminProductsResponse = zod.array(
   ListAdminProductsResponseItem,
 );
+
+/**
+ * @summary Create a new product
+ */
+export const CreateAdminProductBody = zod.object({
+  slug: zod.string(),
+  name: zod.string(),
+  categorySlug: zod.string(),
+  shortDescription: zod.string().optional(),
+  description: zod.string().optional(),
+  startingPrice: zod.number(),
+  enabled: zod.boolean().optional(),
+  uploadConfig: zod
+    .union([
+      zod.object({
+        artworkRequired: zod.boolean(),
+        allowsBackUpload: zod.boolean(),
+        preferredFormats: zod.array(zod.string()),
+        notes: zod.string(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+  options: zod.record(zod.string(), zod.unknown()).nullish(),
+});
 
 /**
  * @summary Update a product
@@ -407,9 +883,23 @@ export const UpdateAdminProductParams = zod.object({
 
 export const UpdateAdminProductBody = zod.object({
   name: zod.string().nullish(),
+  categorySlug: zod.string().nullish(),
   shortDescription: zod.string().nullish(),
+  description: zod.string().nullish(),
   startingPrice: zod.number().nullish(),
   enabled: zod.boolean().nullish(),
+  uploadConfig: zod
+    .union([
+      zod.object({
+        artworkRequired: zod.boolean(),
+        allowsBackUpload: zod.boolean(),
+        preferredFormats: zod.array(zod.string()),
+        notes: zod.string(),
+      }),
+      zod.null(),
+    ])
+    .optional(),
+  options: zod.record(zod.string(), zod.unknown()).nullish(),
 });
 
 export const UpdateAdminProductResponse = zod.object({
@@ -418,8 +908,128 @@ export const UpdateAdminProductResponse = zod.object({
   name: zod.string(),
   categorySlug: zod.string(),
   shortDescription: zod.string(),
+  description: zod.string(),
   startingPrice: zod.number(),
   enabled: zod.boolean(),
+  uploadConfig: zod.object({
+    artworkRequired: zod.boolean(),
+    allowsBackUpload: zod.boolean(),
+    preferredFormats: zod.array(zod.string()),
+    notes: zod.string(),
+  }),
+  options: zod.record(zod.string(), zod.unknown()).nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a product
+ */
+export const DeleteAdminProductParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List quote requests
+ */
+export const ListAdminQuotesQueryParams = zod.object({
+  status: zod.coerce.string().optional(),
+});
+
+export const ListAdminQuotesResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  productCategory: zod.string(),
+  productSlug: zod.string().nullish(),
+  description: zod.string(),
+  requestedQuantity: zod.number().nullish(),
+  notes: zod.string(),
+  status: zod.string(),
+  adminNotes: zod.string(),
+  quotedAmount: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListAdminQuotesResponse = zod.array(ListAdminQuotesResponseItem);
+
+/**
+ * @summary Get a single quote request
+ */
+export const GetAdminQuoteParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetAdminQuoteResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  productCategory: zod.string(),
+  productSlug: zod.string().nullish(),
+  description: zod.string(),
+  requestedQuantity: zod.number().nullish(),
+  notes: zod.string(),
+  status: zod.string(),
+  adminNotes: zod.string(),
+  quotedAmount: zod.string().nullish(),
+  files: zod.array(
+    zod.object({
+      id: zod.number(),
+      originalName: zod.string(),
+      fileType: zod.string(),
+      fileSize: zod.number(),
+      side: zod
+        .union([zod.literal("front"), zod.literal("back"), zod.literal(null)])
+        .nullish(),
+      isProof: zod.boolean().optional(),
+      uploadedAt: zod.coerce.date(),
+    }),
+  ),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update quote status, admin notes, quoted amount
+ */
+export const UpdateAdminQuoteParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateAdminQuoteBody = zod.object({
+  status: zod.string().nullish(),
+  adminNotes: zod.string().nullish(),
+  quotedAmount: zod.string().nullish(),
+});
+
+export const UpdateAdminQuoteResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().nullish(),
+  productCategory: zod.string(),
+  productSlug: zod.string().nullish(),
+  description: zod.string(),
+  requestedQuantity: zod.number().nullish(),
+  notes: zod.string(),
+  status: zod.string(),
+  adminNotes: zod.string(),
+  quotedAmount: zod.string().nullish(),
+  files: zod.array(
+    zod.object({
+      id: zod.number(),
+      originalName: zod.string(),
+      fileType: zod.string(),
+      fileSize: zod.number(),
+      side: zod
+        .union([zod.literal("front"), zod.literal("back"), zod.literal(null)])
+        .nullish(),
+      isProof: zod.boolean().optional(),
+      uploadedAt: zod.coerce.date(),
+    }),
+  ),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });

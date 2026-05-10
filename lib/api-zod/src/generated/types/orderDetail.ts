@@ -20,12 +20,23 @@ export interface OrderDetail {
   billingAddress: Address;
   shippingAddress: Address;
   notes: string;
+  deliveryMethod: string;
+  pickupInstructions: string;
+  /** @nullable */
+  estimatedReadyDate?: Date | null;
+  /** @nullable */
+  discountCode?: string | null;
+  discountAmount: number;
   subtotal: number;
   tax: number;
   shipping: number;
   total: number;
   paymentStatus: string;
   orderStatus: string;
+  proofStatus: string;
+  /** @nullable */
+  proofFileId?: number | null;
+  proofComment: string;
   createdAt: Date;
   updatedAt: Date;
   items: OrderItemDetail[];

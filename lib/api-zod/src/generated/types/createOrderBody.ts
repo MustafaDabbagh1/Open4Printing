@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Address } from "./address";
+import type { CreateOrderBodyDeliveryMethod } from "./createOrderBodyDeliveryMethod";
 import type { CreateOrderItem } from "./createOrderItem";
 
 export interface CreateOrderBody {
@@ -17,6 +18,11 @@ export interface CreateOrderBody {
   billingAddress: Address;
   shippingAddress: Address;
   notes?: string;
+  deliveryMethod?: CreateOrderBodyDeliveryMethod;
+  pickupInstructions?: string;
+  /** @nullable */
+  discountCode?: string | null;
+  discountAmount?: number;
   items: CreateOrderItem[];
   subtotal: number;
   tax?: number;
