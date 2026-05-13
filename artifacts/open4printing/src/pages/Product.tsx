@@ -269,26 +269,26 @@ export default function Product() {
               <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight mb-3">{product.name}</h1>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">{product.shortDescription}</p>
 
-              <div className="space-y-8 flex-1">
-                <div className="space-y-4">
-                  <Label className="text-base font-bold">Print Quantity</Label>
+              <div className="space-y-3 flex-1">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Print Quantity</Label>
                   <Select value={quantity} onValueChange={setQuantity}>
-                    <SelectTrigger className="h-14 text-lg rounded-xl bg-muted/50 border-transparent focus:bg-background"><SelectValue placeholder="Select quantity" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm rounded-md bg-muted/50 border-transparent focus:bg-background"><SelectValue placeholder="Select quantity" /></SelectTrigger>
                     <SelectContent>
                       {["50", "100", "250", "500", "1000", "2500", "5000"].map((q) => (
-                        <SelectItem key={q} value={q} className="text-lg">{q}</SelectItem>
+                        <SelectItem key={q} value={q} className="text-sm">{q}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 {product.sizeOptions && product.sizeOptions.length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-base font-bold">Size</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-wider">Size</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                       {product.sizeOptions.map((opt) => (
-                        <div key={opt} className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${size === opt ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary/50"}`} onClick={() => setSize(opt)}>
-                          <div className="flex items-center justify-between"><span className="font-semibold">{opt}</span>{size === opt && <Check className="w-5 h-5 text-primary" />}</div>
+                        <div key={opt} className={`cursor-pointer border rounded-md px-2.5 py-2 transition-all ${size === opt ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`} onClick={() => setSize(opt)}>
+                          <div className="flex items-center justify-between gap-1"><span className="text-sm font-semibold leading-tight break-words">{opt}</span>{size === opt && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}</div>
                         </div>
                       ))}
                     </div>
@@ -296,13 +296,13 @@ export default function Product() {
                 )}
 
                 {product.materialOptions && product.materialOptions.length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-base font-bold">Paper / Material</Label>
-                    <RadioGroup value={material} onValueChange={setMaterial} className="gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-wider">Paper / Material</Label>
+                    <RadioGroup value={material} onValueChange={setMaterial} className="gap-1.5 grid grid-cols-2 sm:grid-cols-3">
                       {product.materialOptions.map((opt) => (
-                        <div key={opt} className={`flex items-center space-x-3 border-2 rounded-xl p-4 cursor-pointer transition-all ${material === opt ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setMaterial(opt)}>
-                          <RadioGroupItem value={opt} id={`mat-${opt}`} className={material === opt ? "border-primary text-primary" : ""} />
-                          <Label htmlFor={`mat-${opt}`} className="cursor-pointer font-medium text-base flex-1">{opt}</Label>
+                        <div key={opt} className={`flex items-center gap-2 border rounded-md px-2.5 py-2 cursor-pointer transition-all ${material === opt ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setMaterial(opt)}>
+                          <RadioGroupItem value={opt} id={`mat-${opt}`} className={`h-3.5 w-3.5 shrink-0 ${material === opt ? "border-primary text-primary" : ""}`} />
+                          <Label htmlFor={`mat-${opt}`} className="cursor-pointer font-medium text-sm flex-1 leading-tight break-words">{opt}</Label>
                         </div>
                       ))}
                     </RadioGroup>
@@ -310,15 +310,15 @@ export default function Product() {
                 )}
 
                 {product.turnaroundOptions && product.turnaroundOptions.length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-base font-bold">Turnaround Time</Label>
-                    <RadioGroup value={turnaround} onValueChange={setTurnaround} className="gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-wider">Turnaround</Label>
+                    <RadioGroup value={turnaround} onValueChange={setTurnaround} className="gap-1.5 grid grid-cols-1 sm:grid-cols-2">
                       {product.turnaroundOptions.map((opt) => (
-                        <div key={opt} className={`flex items-center space-x-3 border-2 rounded-xl p-4 cursor-pointer transition-all ${turnaround === opt ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setTurnaround(opt)}>
-                          <RadioGroupItem value={opt} id={`turn-${opt}`} />
-                          <div className="flex-1 flex justify-between items-center cursor-pointer">
-                            <Label htmlFor={`turn-${opt}`} className="cursor-pointer font-medium text-base">{opt}</Label>
-                            <Clock className="w-4 h-4 text-muted-foreground" />
+                        <div key={opt} className={`flex items-center gap-2 border rounded-md px-2.5 py-2 cursor-pointer transition-all ${turnaround === opt ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setTurnaround(opt)}>
+                          <RadioGroupItem value={opt} id={`turn-${opt}`} className="h-3.5 w-3.5 shrink-0" />
+                          <div className="flex-1 flex justify-between items-center cursor-pointer gap-1">
+                            <Label htmlFor={`turn-${opt}`} className="cursor-pointer font-medium text-sm leading-tight break-words">{opt}</Label>
+                            <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                           </div>
                         </div>
                       ))}

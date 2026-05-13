@@ -376,8 +376,8 @@ export function Layout({ children }: { children: ReactNode }) {
                     {group.label}
                     <ChevronDown className="w-3 h-3 opacity-60" />
                   </Link>
-                  {/* Mega panel */}
-                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full mt-0 z-40 pt-2">
+                  {/* Mega panel — opens on hover OR keyboard focus within the group */}
+                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full mt-0 z-40 pt-2">
                     <div
                       className="bg-card border border-border shadow-2xl rounded-2xl p-6 w-[640px] max-w-[90vw]"
                       style={{ minWidth: "16rem" }}

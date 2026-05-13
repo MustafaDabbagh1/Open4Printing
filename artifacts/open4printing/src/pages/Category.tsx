@@ -58,65 +58,67 @@ export default function Category() {
           </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Product Grid — compact cards (≈3× smaller) */}
         {categoryProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {categoryProducts.map((product, i) => (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
                 key={product.id}
-                className="group relative flex flex-col bg-card rounded-[2rem] border border-border shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                className="group relative flex flex-col bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
               >
-                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                <div className="absolute top-2 right-2 z-10 flex gap-1.5">
                   {product.isOnSale && (
-                    <Badge variant="destructive" className="px-3 py-1 shadow-md">SALE</Badge>
+                    <Badge variant="destructive" className="px-2 py-0.5 text-[10px] shadow">SALE</Badge>
                   )}
-                  <Button 
-                    variant="secondary" 
-                    size="icon" 
-                    className={`rounded-full shadow-md backdrop-blur-md bg-white/80 hover:bg-white ${isFavorite(product.id) ? 'text-red-500' : 'text-muted-foreground'}`}
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    aria-label={isFavorite(product.id) ? "Remove from favorites" : "Add to favorites"}
+                    className={`h-9 w-9 md:h-8 md:w-8 rounded-full shadow backdrop-blur-md bg-white/80 hover:bg-white ${isFavorite(product.id) ? 'text-red-500' : 'text-muted-foreground'}`}
                     onClick={(e) => {
                       e.preventDefault();
                       toggleFavorite(product.id);
                     }}
                   >
-                    <Heart className={`w-5 h-5 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
+                    <Heart className={`w-4 h-4 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
                   </Button>
                 </div>
 
-                <Link href={`/product/${product.slug}`} className="relative h-72 md:h-80 bg-muted overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Link href={`/product/${product.slug}`} className="relative aspect-square bg-muted overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent z-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {categories.find(c => c.id === product.categoryId)?.image ? (
-                    <img 
-                      src={categories.find(c => c.id === product.categoryId)?.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    <img
+                      src={categories.find(c => c.id === product.categoryId)?.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-secondary/10">
-                      <Package className="w-16 h-16 text-muted-foreground" />
+                      <Package className="w-6 h-6 text-muted-foreground" />
                     </div>
                   )}
                 </Link>
-                
-                <div className="p-8 flex flex-col flex-1 relative bg-card">
+
+                <div className="p-3 flex flex-col flex-1 bg-card">
                   <Link href={`/product/${product.slug}`}>
-                    <h3 className="text-2xl font-bold font-serif mb-3 group-hover:text-primary transition-colors">{product.name}</h3>
+                    <h3 className="text-sm font-bold font-serif mb-1 line-clamp-2 group-hover:text-primary transition-colors leading-tight">{product.name}</h3>
                   </Link>
-                  <p className="text-muted-foreground mb-8 line-clamp-2 text-lg flex-1">{product.shortDescription}</p>
-                  
-                  <div className="flex items-end justify-between mt-auto">
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Starting at</div>
-                      <div className="text-3xl font-black">${product.startingPrice.toFixed(2)}</div>
+                  <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2 leading-snug">{product.shortDescription}</p>
+
+                  <div className="flex items-end justify-between mt-auto gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">From</div>
+                      <div className="text-base font-black leading-none">${product.startingPrice.toFixed(2)}</div>
                     </div>
-                    <Button 
+                    <Button
                       onClick={() => setLocation(`/product/${product.slug}`)}
-                      className="rounded-full px-6 py-6 font-bold shadow-md hover-elevate transition-all"
+                      size="sm"
+                      className="h-9 md:h-8 rounded-full px-3 text-xs font-semibold shadow-sm hover-elevate"
                     >
-                      Shop Now
+                      Shop
                     </Button>
                   </div>
                 </div>
