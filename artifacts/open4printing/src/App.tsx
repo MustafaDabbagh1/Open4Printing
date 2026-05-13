@@ -14,6 +14,8 @@ import Help from "@/pages/Help";
 import Checkout from "@/pages/Checkout";
 import OrderConfirmation from "@/pages/OrderConfirmation";
 import Quote from "@/pages/Quote";
+import WebDesignServices from "@/pages/WebDesignServices";
+import SocialMediaMarketingServices from "@/pages/SocialMediaMarketingServices";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrders from "@/pages/admin/AdminOrders";
@@ -49,6 +51,8 @@ function Router() {
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-confirmation/:orderNumber" component={OrderConfirmation} />
             <Route path="/quote" component={Quote} />
+            <Route path="/web-design-services" component={WebDesignServices} />
+            <Route path="/social-media-marketing-services" component={SocialMediaMarketingServices} />
             <Route path="/upload" component={Upload} />
             <Route path="/help" component={Help} />
             <Route path="/account/login" component={CustomerLogin} />

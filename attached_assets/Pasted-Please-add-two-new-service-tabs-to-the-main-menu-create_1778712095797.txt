@@ -1,0 +1,86 @@
+Please add two new service tabs to the main menu, create two new pages, and add two new homepage sections near the very bottom.
+
+New menu tabs:
+1. Web Design Services
+2. Social Media Marketing Services
+
+Create these new pages:
+- /web-design-services
+- /social-media-marketing-services
+
+1. Web Design Services page
+Create a clean service page for web design services.
+
+Important:
+- Use screenshots from https://ppdtechnology.com as one of our client examples/portfolio examples.
+- Crawl or reference ppdtechnology.com and use screenshots/mockups from that website in the Web Design Services page.
+- Present PPD Technology as a client/project example.
+- Make the page look professional and simple, not too crowded.
+
+Suggested sections:
+- Hero section: “Professional Web Design Services”
+- Short description: custom websites for businesses that need a clean, modern, trustworthy online presence.
+- Portfolio/client example: PPD Technology with screenshots from ppdtechnology.com
+- Services included:
+  - Business websites
+  - Ecommerce websites
+  - Landing pages
+  - Mobile responsive design
+  - Website redesigns
+  - Checkout and product page setup
+  - Contact forms and lead capture
+- Call-to-action button: “Request a Web Design Quote”
+
+2. Social Media Marketing Services page
+Create a clean service page for social media marketing services.
+
+Focus:
+- Short-form media
+- Reels
+- TikToks
+- YouTube Shorts
+- Product videos
+- Business promo clips
+- Ad creatives
+- Content strategy
+
+Important:
+- Do not use faces in the images or visuals.
+- Use visuals like phones, cameras, products, hands, editing timelines, social media icons, captions, analytics, and short-form video mockups.
+- No people’s faces should appear anywhere on this page.
+
+Suggested sections:
+- Hero section: “Social Media Marketing Services”
+- Short description: helping businesses create short-form content that gets attention and turns viewers into customers.
+- Services included:
+  - Short-form video editing
+  - Reels, TikToks, and YouTube Shorts
+  - Product promo videos
+  - Caption writing
+  - Content calendars
+  - Social media ad creatives
+  - Basic performance tracking
+- Call-to-action button: “Request Social Media Help”
+
+3. Homepage bottom sections
+Add two new sections near the very bottom of the homepage, above the footer:
+
+Section 1: Web Design Services
+- Short description
+- Small visual/mockup using screenshots from ppdtechnology.com
+- Button linking to /web-design-services
+
+Section 2: Social Media Marketing Services
+- Short description focused on short-form media
+- Use visuals with no faces
+- Button linking to /social-media-marketing-services
+
+4. Menu/navigation
+- Add both new tabs to the main navigation menu.
+- Make sure they work on desktop and mobile.
+- Make sure they are not cut off and fit properly on all screen sizes.
+
+5. Keep current design
+Do not redesign the whole website.
+Keep the current colors, animations, style, spacing, and branding.
+Only add these two services, pages, menu tabs, and homepage sections.

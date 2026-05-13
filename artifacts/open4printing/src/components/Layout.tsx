@@ -178,6 +178,38 @@ const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
+  {
+    label: "Web Design",
+    href: "/web-design-services",
+    columns: [
+      {
+        heading: "Web Design Services",
+        items: [
+          { label: "Business websites", href: "/web-design-services" },
+          { label: "Ecommerce websites", href: "/web-design-services" },
+          { label: "Landing pages", href: "/web-design-services" },
+          { label: "Website redesigns", href: "/web-design-services" },
+          { label: "Request a quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Social Media",
+    href: "/social-media-marketing-services",
+    columns: [
+      {
+        heading: "Social Media Marketing",
+        items: [
+          { label: "Reels, TikToks & Shorts", href: "/social-media-marketing-services" },
+          { label: "Product promo videos", href: "/social-media-marketing-services" },
+          { label: "Ad creatives", href: "/social-media-marketing-services" },
+          { label: "Content strategy", href: "/social-media-marketing-services" },
+          { label: "Request help", href: "/quote" },
+        ],
+      },
+    ],
+  },
 ];
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

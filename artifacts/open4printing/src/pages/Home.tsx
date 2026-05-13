@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowRight, ShieldCheck, Clock, Zap, CheckCircle2, Star, Upload, SlidersHorizontal, PackageCheck } from "lucide-react";
+import { Search, ArrowRight, ShieldCheck, Clock, Zap, CheckCircle2, Star, Upload, SlidersHorizontal, PackageCheck, Sparkles, Smartphone, Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -250,6 +250,110 @@ export default function Home() {
                   <div className="text-muted-foreground">PDF, AI, PSD, PNG up to 500MB</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Web Design Services teaser */}
+      <section className="py-16 md:py-20 bg-muted/30 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <Badge variant="secondary" className="mb-4">New Service</Badge>
+              <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4">
+                Web Design Services
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
+                Custom websites for businesses that need a clean, modern, trustworthy online presence —
+                from landing pages to full ecommerce builds. See our recent project for PPD Technology.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setLocation('/web-design-services')}
+                className="h-12 px-7 rounded-full text-base font-bold shadow-lg hover-elevate"
+                data-testid="button-home-web-design"
+              >
+                Explore Web Design
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+            <a
+              href="/web-design-services"
+              onClick={(e) => { e.preventDefault(); setLocation('/web-design-services'); }}
+              className="block rounded-2xl overflow-hidden border border-border shadow-2xl bg-card group"
+            >
+              <div className="aspect-[16/10] bg-muted overflow-hidden">
+                <img
+                  src={`${import.meta.env.BASE_URL}ppdtechnology-screenshot.png`}
+                  alt="PPD Technology website screenshot — recent web design project"
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Client project</div>
+                  <div className="text-base font-bold">PPD Technology</div>
+                </div>
+                <span className="text-sm font-semibold text-primary">View case →</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Media Marketing teaser */}
+      <section className="py-16 md:py-20 bg-background border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            {/* Visual: phone-shaped short-form video preview, no faces */}
+            <div className="order-2 lg:order-1 flex justify-center">
+              <div className="relative">
+                {/* Floating chips */}
+                <div className="absolute -top-4 -left-6 px-3 py-1.5 rounded-full bg-card border border-border shadow-lg text-xs font-bold flex items-center gap-1.5 rotate-[-6deg]">
+                  <Sparkles className="w-3 h-3 text-primary" /> Reels
+                </div>
+                <div className="absolute -top-2 right-0 px-3 py-1.5 rounded-full bg-card border border-border shadow-lg text-xs font-bold flex items-center gap-1.5 rotate-[6deg]">
+                  <Smartphone className="w-3 h-3 text-primary" /> Shorts
+                </div>
+                <div className="absolute bottom-6 -left-8 px-3 py-1.5 rounded-full bg-primary text-primary-foreground shadow-lg text-xs font-bold flex items-center gap-1.5 rotate-[-8deg]">
+                  +312% reach
+                </div>
+                {/* Phone */}
+                <div className="w-[220px] h-[440px] rounded-[2rem] border-[8px] border-foreground/90 bg-foreground/90 shadow-2xl overflow-hidden">
+                  <div className="w-full h-full rounded-[1.4rem] bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 relative">
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-full" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center">
+                        <Play className="w-7 h-7 text-white fill-current ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 text-white">
+                      <div className="text-[10px] font-bold mb-0.5">@yourbrand</div>
+                      <div className="text-[10px] opacity-95 leading-tight">✨ 15-second story. #shorts</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <Badge variant="secondary" className="mb-4">New Service</Badge>
+              <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4">
+                Social Media Marketing
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">
+                Short-form content that gets attention and turns viewers into customers — Reels, TikToks,
+                YouTube Shorts, product promos, ad creatives, and full content strategy.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setLocation('/social-media-marketing-services')}
+                className="h-12 px-7 rounded-full text-base font-bold shadow-lg hover-elevate"
+                data-testid="button-home-social-media"
+              >
+                Explore Social Media
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </div>
           </div>
         </div>
