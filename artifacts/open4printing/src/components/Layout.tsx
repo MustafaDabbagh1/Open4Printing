@@ -364,63 +364,70 @@ export function Layout({ children }: { children: ReactNode }) {
 
         {/* Categories Nav (Desktop) — Sinalite-style mega dropdown */}
         <div className="hidden md:block border-t border-border">
-          <div className="container mx-auto px-4 relative">
-            <nav className="flex items-center justify-center flex-wrap gap-x-1 gap-y-2 py-2 text-sm font-medium">
-              {NAV_GROUPS.map((group) => (
-                <div key={group.label} className="relative group">
-                  <Link
-                    href={group.href}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors"
-                    data-testid={`nav-${group.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {group.label}
-                    <ChevronDown className="w-3 h-3 opacity-60" />
-                  </Link>
-                  {/* Mega panel — opens on hover OR keyboard focus within the group */}
-                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full mt-0 z-40 pt-2">
-                    <div
-                      className="bg-card border border-border shadow-2xl rounded-2xl p-6 w-[640px] max-w-[90vw]"
-                      style={{ minWidth: "16rem" }}
+          <div className="container mx-auto px-2 lg:px-4 relative">
+            <nav className="flex items-center justify-center flex-wrap gap-x-0.5 lg:gap-x-1 gap-y-1 py-2 text-xs lg:text-sm font-medium">
+              {NAV_GROUPS.map((group, idx) => {
+                // Anchor panels to the side of the trigger that has the most room,
+                // so the popup never overflows the viewport horizontally.
+                const isFirstHalf = idx < NAV_GROUPS.length / 2;
+                const panelAnchor = isFirstHalf ? "left-0" : "right-0";
+                return (
+                  <div key={group.label} className="relative group">
+                    <Link
+                      href={group.href}
+                      className="inline-flex items-center gap-0.5 lg:gap-1 px-2 lg:px-2.5 py-1.5 lg:py-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors whitespace-nowrap"
+                      data-testid={`nav-${group.label.toLowerCase().replace(/\s+/g, "-")}`}
                     >
-                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
-                        <div>
-                          <div className="font-serif text-lg font-bold text-foreground">{group.label}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            Click any item to jump straight to its product page.
-                          </div>
-                        </div>
-                        <Link
-                          href={group.href}
-                          className="text-sm font-semibold text-primary hover:underline whitespace-nowrap"
-                        >
-                          Shop all →
-                        </Link>
-                      </div>
-                      <div className={`grid gap-6 ${group.columns.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
-                        {group.columns.map((col) => (
-                          <div key={col.heading}>
-                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                              {col.heading}
+                      {group.label}
+                      <ChevronDown className="w-3 h-3 opacity-60 shrink-0" />
+                    </Link>
+                    {/* Mega panel — opens on hover OR keyboard focus, anchored to nearest viewport edge */}
+                    <div
+                      className={`invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute ${panelAnchor} top-full z-40 pt-2`}
+                    >
+                      <div
+                        className="bg-card border border-border shadow-2xl rounded-2xl p-4 lg:p-5 w-[440px] max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-border">
+                          <div className="min-w-0">
+                            <div className="font-serif text-base lg:text-lg font-bold text-foreground truncate">{group.label}</div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                              Click any item to jump straight to its product page.
                             </div>
-                            <ul className="flex flex-col gap-2">
-                              {col.items.map((item) => (
-                                <li key={item.label}>
-                                  <Link
-                                    href={item.href}
-                                    className="text-sm text-foreground/80 hover:text-primary transition-colors"
-                                  >
-                                    {item.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
                           </div>
-                        ))}
+                          <Link
+                            href={group.href}
+                            className="text-xs lg:text-sm font-semibold text-primary hover:underline whitespace-nowrap shrink-0"
+                          >
+                            Shop all →
+                          </Link>
+                        </div>
+                        <div className={`grid gap-3 lg:gap-4 ${group.columns.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
+                          {group.columns.map((col) => (
+                            <div key={col.heading} className="min-w-0">
+                              <div className="text-[10px] lg:text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                                {col.heading}
+                              </div>
+                              <ul className="flex flex-col gap-1.5">
+                                {col.items.map((item) => (
+                                  <li key={item.label}>
+                                    <Link
+                                      href={item.href}
+                                      className="block text-xs lg:text-sm text-foreground/80 hover:text-primary transition-colors leading-snug"
+                                    >
+                                      {item.label}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </nav>
           </div>
         </div>
