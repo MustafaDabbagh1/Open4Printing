@@ -26,31 +26,27 @@ export default function Category() {
 
   return (
     <div className="flex flex-col pb-24">
-      {/* Category Hero */}
-      <div className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-background/70 z-10" />
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
-          style={{ backgroundImage: `url('${category.image || '/images/hero.png'}')` }}
-        />
-        <div className="container mx-auto px-4 relative z-20 text-center flex flex-col items-center">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium mb-6 bg-card/80 backdrop-blur-md px-4 py-2 rounded-full border border-border">
-            <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-foreground">{category.name}</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight text-foreground mb-6">
-            {category.name}
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-medium">
-            {category.shortDescription}
-          </p>
+      {/* Slim breadcrumb + title (no hero/background image) */}
+      <div className="bg-muted/30 border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-2 text-sm text-muted-foreground font-medium overflow-x-auto whitespace-nowrap">
+          <Link href="/" className="hover:text-primary transition-colors shrink-0">Home</Link>
+          <ChevronRight className="w-4 h-4 shrink-0" />
+          <span className="text-foreground shrink-0">{category.name}</span>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 mt-12">
+      <div className="container mx-auto px-4 pt-6">
+        <div className="mb-6">
+          <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-foreground mb-2">
+            {category.name}
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+            {category.shortDescription}
+          </p>
+        </div>
+
         {/* Filters strip (Visual only for now) */}
-        <div className="flex flex-wrap items-center gap-4 mb-12 pb-6 border-b border-border">
+        <div className="flex flex-wrap items-center gap-4 mb-8 pb-4 border-b border-border">
           <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground mr-2">Filter by:</span>
           <Badge variant="secondary" className="px-4 py-2 text-sm rounded-full cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">All Types</Badge>
           <Badge variant="outline" className="px-4 py-2 text-sm rounded-full cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors bg-background">Standard Size</Badge>

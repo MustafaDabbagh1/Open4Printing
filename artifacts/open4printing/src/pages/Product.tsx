@@ -210,8 +210,8 @@ export default function Product() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+      <div className="container mx-auto px-4 pt-4 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-6">
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-card rounded-[2rem] border border-border overflow-hidden shadow-sm aspect-square md:aspect-[4/3] relative">
               {category.image ? (

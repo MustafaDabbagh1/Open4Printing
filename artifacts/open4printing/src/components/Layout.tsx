@@ -1,10 +1,184 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Heart, User, HelpCircle, Search, Menu, X, ChevronDown, Package, FileUp, Zap, MapPin, Mail, Phone } from "lucide-react";
+import { ShoppingCart, Heart, User, HelpCircle, Search, Menu, ChevronDown, Package, FileUp, Zap, MapPin, Mail, Phone } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { categories, products } from "@/data/products";
 import { useState } from "react";
+
+// Sinalite-style mega menu: each top-level item maps to a category page and
+// reveals a panel with clickable subcategory/product columns.
+type NavCol = { heading: string; items: { label: string; href: string }[] };
+type NavGroup = { label: string; href: string; columns: NavCol[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "Business Cards",
+    href: "/category/business-cards",
+    columns: [
+      {
+        heading: "Standard",
+        items: [
+          { label: "Standard Business Cards", href: "/product/standard-business-cards" },
+          { label: "Premium Soft Touch Cards", href: "/product/premium-soft-touch-cards" },
+          { label: "Shop all Business Cards", href: "/category/business-cards" },
+        ],
+      },
+      {
+        heading: "Specialty Finishes",
+        items: [
+          { label: "Soft Touch Lamination", href: "/product/premium-soft-touch-cards" },
+          { label: "Matte / Gloss Cardstock", href: "/product/standard-business-cards" },
+          { label: "Request a custom quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Flyers",
+    href: "/category/postcards-flyers",
+    columns: [
+      {
+        heading: "Popular Sizes",
+        items: [
+          { label: 'Standard Postcards', href: "/product/standard-postcards" },
+          { label: "Shop all Print Advertising", href: "/category/postcards-flyers" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Postcards",
+    href: "/category/postcards-flyers",
+    columns: [
+      {
+        heading: "Postcards",
+        items: [
+          { label: "Standard Postcards", href: "/product/standard-postcards" },
+          { label: "Shop all Postcards & Flyers", href: "/category/postcards-flyers" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Brochures",
+    href: "/category/postcards-flyers",
+    columns: [
+      {
+        heading: "Marketing",
+        items: [
+          { label: "Postcards & Flyers", href: "/category/postcards-flyers" },
+          { label: "Request a brochure quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Signs",
+    href: "/category/signs-banners",
+    columns: [
+      {
+        heading: "Outdoor Signs",
+        items: [
+          { label: "Corrugated Yard Signs", href: "/product/corrugated-yard-signs" },
+          { label: "Shop all Signs & Banners", href: "/category/signs-banners" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Banners",
+    href: "/category/signs-banners",
+    columns: [
+      {
+        heading: "Banners",
+        items: [
+          { label: "Shop all Signs & Banners", href: "/category/signs-banners" },
+          { label: "Request a banner quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Stickers",
+    href: "/category/stickers-labels",
+    columns: [
+      {
+        heading: "Custom Stickers",
+        items: [
+          { label: "Custom Die-Cut Stickers", href: "/product/custom-die-cut-stickers" },
+          { label: "Shop all Stickers & Labels", href: "/category/stickers-labels" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Labels",
+    href: "/category/stickers-labels",
+    columns: [
+      {
+        heading: "Product Labels",
+        items: [
+          { label: "Shop all Stickers & Labels", href: "/category/stickers-labels" },
+          { label: "Request a label quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Posters",
+    href: "/category/signs-banners",
+    columns: [
+      {
+        heading: "Posters",
+        items: [
+          { label: "Shop all Signs, Banners & Posters", href: "/category/signs-banners" },
+          { label: "Request a poster quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Invitations",
+    href: "/category/invitations-stationery",
+    columns: [
+      {
+        heading: "Invitations & Stationery",
+        items: [
+          { label: "Shop all Invitations & Stationery", href: "/category/invitations-stationery" },
+          { label: "Wedding", href: "/category/wedding" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Marketing Materials",
+    href: "/category/postcards-flyers",
+    columns: [
+      {
+        heading: "Marketing",
+        items: [
+          { label: "Postcards & Flyers", href: "/category/postcards-flyers" },
+          { label: "Promotional Products", href: "/category/promo-products" },
+          { label: "Custom Mailer Boxes", href: "/product/custom-mailer-boxes" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Office Materials",
+    href: "/category/invitations-stationery",
+    columns: [
+      {
+        heading: "Office",
+        items: [
+          { label: "Stationery & Letterheads", href: "/category/invitations-stationery" },
+          { label: "Design Services", href: "/category/design-services" },
+        ],
+      },
+    ],
+  },
+];
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -62,18 +236,29 @@ export function Layout({ children }: { children: ReactNode }) {
                     </div>
 
                     <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="categories">
-                        <AccordionTrigger className="text-lg font-semibold">Products</AccordionTrigger>
-                        <AccordionContent>
-                          <div className="flex flex-col gap-2 pl-4">
-                            {categories.map(cat => (
-                              <Link key={cat.id} href={`/category/${cat.slug}`} className="py-2 text-base text-muted-foreground hover:text-foreground">
-                                {cat.name}
+                      {NAV_GROUPS.map((group) => (
+                        <AccordionItem key={group.label} value={group.label}>
+                          <AccordionTrigger className="text-base font-semibold">{group.label}</AccordionTrigger>
+                          <AccordionContent>
+                            <div className="flex flex-col gap-1 pl-4">
+                              <Link href={group.href} className="py-2 text-sm font-semibold text-foreground hover:text-primary">
+                                Shop all {group.label}
                               </Link>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                              {group.columns.flatMap((col) =>
+                                col.items.map((item) => (
+                                  <Link
+                                    key={`${group.label}-${item.label}`}
+                                    href={item.href}
+                                    className="py-1.5 text-sm text-muted-foreground hover:text-foreground"
+                                  >
+                                    {item.label}
+                                  </Link>
+                                )),
+                              )}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
                     </Accordion>
 
                     <div className="flex flex-col gap-4 mt-auto">
@@ -177,27 +362,65 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Categories Nav (Desktop) */}
+        {/* Categories Nav (Desktop) — Sinalite-style mega dropdown */}
         <div className="hidden md:block border-t border-border">
-          <div className="container mx-auto px-4">
-            <nav className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 py-3 text-sm font-medium">
-              {categories.slice(0, 8).map(cat => (
-                <Link key={cat.id} href={`/category/${cat.slug}`} className="text-muted-foreground hover:text-foreground transition-colors py-1">
-                  {cat.name}
-                </Link>
-              ))}
-              <div className="relative group py-1">
-                <button className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                  More <ChevronDown className="w-3 h-3" />
-                </button>
-                <div className="absolute top-full right-0 w-48 bg-card border border-border shadow-lg rounded-xl p-2 hidden group-hover:flex flex-col gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {categories.slice(8).map(cat => (
-                    <Link key={cat.id} href={`/category/${cat.slug}`} className="text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2 rounded-md transition-colors">
-                      {cat.name}
-                    </Link>
-                  ))}
+          <div className="container mx-auto px-4 relative">
+            <nav className="flex items-center justify-center flex-wrap gap-x-1 gap-y-2 py-2 text-sm font-medium">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label} className="relative group">
+                  <Link
+                    href={group.href}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-md text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors"
+                    data-testid={`nav-${group.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    {group.label}
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </Link>
+                  {/* Mega panel */}
+                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full mt-0 z-40 pt-2">
+                    <div
+                      className="bg-card border border-border shadow-2xl rounded-2xl p-6 w-[640px] max-w-[90vw]"
+                      style={{ minWidth: "16rem" }}
+                    >
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+                        <div>
+                          <div className="font-serif text-lg font-bold text-foreground">{group.label}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Click any item to jump straight to its product page.
+                          </div>
+                        </div>
+                        <Link
+                          href={group.href}
+                          className="text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+                        >
+                          Shop all →
+                        </Link>
+                      </div>
+                      <div className={`grid gap-6 ${group.columns.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                        {group.columns.map((col) => (
+                          <div key={col.heading}>
+                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                              {col.heading}
+                            </div>
+                            <ul className="flex flex-col gap-2">
+                              {col.items.map((item) => (
+                                <li key={item.label}>
+                                  <Link
+                                    href={item.href}
+                                    className="text-sm text-foreground/80 hover:text-primary transition-colors"
+                                  >
+                                    {item.label}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </nav>
           </div>
         </div>
