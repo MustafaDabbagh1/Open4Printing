@@ -42,16 +42,35 @@ jobs:
           PORT: 5000
           BASE_PATH: /
 
-      - name: Add custom domain and SPA fallback
+      - name: Find and prepare built site
         run: |
-          echo "open4printing.com" > artifacts/open4printing/dist/CNAME
-          cp artifacts/open4printing/dist/index.html artifacts/open4printing/dist/404.html
-          ls -la artifacts/open4printing/dist
+          echo "Finding built index.html..."
+          INDEX_FILE=$(find artifacts/open4printing -path "*/index.html" -not -path "*/node_modules/*" -print -quit)
+
+          if [ -z "$INDEX_FILE" ]; then
+            echo "No index.html found after build."
+            echo "Here are the folders/files after build:"
+            find artifacts/open4printing -maxdepth 4 -type f
+            exit 1
+          fi
+
+          echo "Found index.html at: $INDEX_FILE"
+          DIST_DIR=$(dirname "$INDEX_FILE")
+          echo "Using build output folder: $DIST_DIR"
+
+          mkdir -p pages-dist
+          cp -a "$DIST_DIR"/. pages-dist/
+
+          echo "open4printing.com" > pages-dist/CNAME
+          cp pages-dist/index.html pages-dist/404.html
+
+          echo "Final deploy folder:"
+          ls -la pages-dist
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/open4printing/dist
+          path: pages-dist
 
   deploy:
     environment:
