@@ -210,6 +210,22 @@ const NAV_GROUPS: NavGroup[] = [
       },
     ],
   },
+  {
+    label: "Payment Processing & POS",
+    href: "/payment-processing-pos",
+    columns: [
+      {
+        heading: "Payments & POS",
+        items: [
+          { label: "Free POS systems", href: "/payment-processing-pos" },
+          { label: "Countertop terminals", href: "/payment-processing-pos" },
+          { label: "Wireless handhelds", href: "/payment-processing-pos" },
+          { label: "Smart POS tablets", href: "/payment-processing-pos" },
+          { label: "Get a free quote", href: "/quote" },
+        ],
+      },
+    ],
+  },
 ];
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

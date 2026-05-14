@@ -1,0 +1,62 @@
+Please add a new service category for “Payment Processing & POS Systems” across the website.
+
+Reference this website for the theme, layout style, spacing, modern payment-tech feel, sections, colors, and overall design direction:
+https://ppdtechnology.com/
+
+Add it in 3 places:
+
+1. Main Menu
+Add a new top-level menu tab called:
+“Payment Processing & POS”
+
+This should be visible in the desktop navigation menu and mobile menu.
+
+2. New Page
+Create a full page for Payment Processing & POS Systems.
+
+Use https://ppdtechnology.com/ as the design reference. The page should feel similar to PPD Technology’s modern payment processing layout, with a clean hero section, professional cards, smooth spacing, trust-focused sections, and strong CTA buttons.
+
+The page should focus on:
+- Free POS system options
+- Competitive payment processing rates
+- 24/7 customer support
+- Modern countertop and wireless POS systems
+- Fast and secure transactions
+- Support for retail stores, restaurants, markets, and service businesses
+- Easy setup and onboarding
+- Accepting credit cards, debit cards, tap-to-pay, chip cards, and mobile wallet payments
+
+Include sections such as:
+- Hero section
+- Benefits section
+- POS system options section
+- Industries we serve section
+- Why choose us section
+- Final CTA section
+
+Use CTA buttons like:
+“Ask About Free POS Systems”
+“Get a Free Quote”
+“Upgrade Your Payment System”
+
+3. Homepage Bottom Section
+Add a new section near the bottom of the homepage promoting Payment Processing & POS Systems.
+
+Use the same PPDTechnology.com-inspired style for this section as well.
+
+Headline:
+“Payment Processing & POS Systems for Your Business”
+
+Text:
+“Get competitive rates, reliable POS systems, and 24/7 support to keep your business running smoothly.”
+
+CTA button:
+“Ask About Free POS Systems”
+
+Important:
+- Keep the existing Open4Printing design and animations.
+- Use https://ppdtechnology.com/ only as inspiration for this new service page and homepage section.
+- Do not copy text word-for-word from PPD Technology.
+- Do not break the current product pages, checkout, or menu.
+- Make sure everything is fully responsive on desktop, tablet, and mobile.
+- Keep the layout clean, modern, trustworthy, and easy to read.

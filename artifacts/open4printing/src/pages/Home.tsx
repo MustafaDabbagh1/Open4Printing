@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowRight, ShieldCheck, Clock, Zap, CheckCircle2, Star, Upload, SlidersHorizontal, PackageCheck, Sparkles, Smartphone, Play } from "lucide-react";
+import { Search, ArrowRight, ShieldCheck, Clock, Zap, CheckCircle2, Star, Upload, SlidersHorizontal, PackageCheck, Sparkles, Smartphone, Play, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -298,6 +298,87 @@ export default function Home() {
                 <span className="text-sm font-semibold text-primary">View case →</span>
               </div>
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Processing & POS Systems teaser — PPD-inspired dark theme */}
+      <section className="relative overflow-hidden bg-slate-950 text-white border-t border-border">
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="container mx-auto px-4 py-16 md:py-20 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider mb-5">
+                <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                New Service
+              </div>
+              <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4">
+                Payment Processing & POS Systems for Your Business
+              </h2>
+              <p className="text-base md:text-lg text-slate-300 mb-7 leading-relaxed max-w-xl">
+                Get competitive rates, reliable POS systems, and 24/7 support to keep your business running smoothly.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setLocation('/payment-processing-pos')}
+                className="h-12 px-7 rounded-full text-base font-bold shadow-lg bg-cyan-400 text-slate-950 hover:bg-cyan-300"
+                data-testid="button-home-payment-pos"
+              >
+                Ask About Free POS Systems
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+            {/* Dashboard mockup card */}
+            <div className="relative">
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 backdrop-blur shadow-2xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-700/60 bg-slate-900">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                  <div className="ml-3 text-[11px] text-slate-400 font-mono">POS Dashboard</div>
+                  <div className="ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-400 text-[10px] font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    LIVE
+                  </div>
+                </div>
+                <div className="p-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-slate-800/60 border border-slate-700/60 p-4">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Today's Revenue</div>
+                    <div className="text-2xl font-black text-white">$12,847</div>
+                    <div className="text-[11px] text-emerald-400 font-semibold mt-0.5">↑ 18.2%</div>
+                  </div>
+                  <div className="rounded-xl bg-slate-800/60 border border-slate-700/60 p-4">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Transactions</div>
+                    <div className="text-2xl font-black text-white">1,284</div>
+                    <div className="text-[11px] text-emerald-400 font-semibold mt-0.5">↑ 12.6%</div>
+                  </div>
+                  <div className="col-span-2 rounded-xl bg-slate-800/60 border border-slate-700/60 p-4">
+                    <svg viewBox="0 0 200 50" className="w-full h-12">
+                      <defs>
+                        <linearGradient id="homeTrendGrad" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="rgb(34, 211, 238)" stopOpacity="0.6" />
+                          <stop offset="100%" stopColor="rgb(34, 211, 238)" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0,40 L25,32 L50,35 L75,22 L100,28 L125,18 L150,20 L175,10 L200,12 L200,50 L0,50 Z" fill="url(#homeTrendGrad)" />
+                      <path d="M0,40 L25,32 L50,35 L75,22 L100,28 L125,18 L150,20 L175,10 L200,12" fill="none" stroke="rgb(34, 211, 238)" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-3 -right-3 z-20 bg-slate-800/95 backdrop-blur border border-emerald-400/40 rounded-xl px-3 py-2 shadow-2xl flex items-center gap-2 rotate-[3deg]">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <div className="text-[11px] font-bold text-white">Payment Approved</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
