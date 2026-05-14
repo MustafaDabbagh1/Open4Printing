@@ -42,6 +42,12 @@ jobs:
           PORT: 5000
           BASE_PATH: /
 
+      - name: Add custom domain and SPA fallback
+        run: |
+          echo "open4printing.com" > artifacts/open4printing/dist/CNAME
+          cp artifacts/open4printing/dist/index.html artifacts/open4printing/dist/404.html
+          ls -la artifacts/open4printing/dist
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
